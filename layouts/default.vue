@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col min-h-screen  relative">
+  <div class="flex flex-col min-h-screen relative overflow-hidden">
     <!-- Top Header for Mobile -->
     <div class="flex items-center justify-between p-2  shadow md:hidden">
       <button 
@@ -10,8 +10,9 @@
         {{ isLeftSidebarOpen ? '❌' : '☰' }}
       </button>
 
-      <div class="flex items-center">
-        <NuxtImg src="/images/cscc_usdb_logo.jpg" alt="Logo" class="w-10 h-10 rounded-2xl" />
+      <div class="flex -space-x-5 items-center">
+        <NuxtImg src="/images/cscc_usdb_logo.jpg" alt="Logo" class="w-12 h-12 rounded-2xl bg-gradient-to-r border-2 border-white from-purple-200 to-blue-200" />
+        <NuxtImg src="/images/image.webp" alt="Profile Picture" class="w-12 h-12 rounded-full border-2 border-white" />
       </div>
 
       <button 
@@ -35,9 +36,9 @@
       <!-- Main Content -->
       <main 
         :class="`flex-1 min-h-screen transition-all duration-300 
-          ${isLeftSidebarOpen ? 'md:ml-0' : ''}`"
+          ${isLeftSidebarOpen ? 'ml-0' : ''}`"
       >
-        <NuxtPage class="p-4"/>
+        <NuxtPage class="p-2 md:p-6 lg:p-8"/>
       </main>
 
       <!-- Right Sidebar -->

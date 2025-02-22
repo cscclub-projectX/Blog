@@ -12,7 +12,7 @@
     <div class="flex flex-col items-center mb-6">
       <div class="flex -space-x-5">
         <NuxtImg src="/images/cscc_usdb_logo.jpg" alt="Logo" class="w-12 h-12 rounded-2xl bg-gradient-to-r border-2 border-white from-purple-200 to-blue-200" />
-        <NuxtImg src="/images/image.png" alt="Profile Picture" class="w-12 h-12 rounded-full border-2 border-white" />
+        <NuxtImg src="/images/image.webp" alt="Profile Picture" class="w-12 h-12 rounded-full border-2 border-white" />
       </div>
       <div class="text-center mt-2">
         <h3 class="font-semibold text-gray-800">Bogdan Nikitin</h3>

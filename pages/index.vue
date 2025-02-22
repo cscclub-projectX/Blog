@@ -1,6 +1,6 @@
 <template>
-    <div class="container mx-auto">
-        <div class="flex flex-col items-center justify-center">
+    <div class="">
+        <div class="">
             <h1 class="text-3xl font-bold underline ">
                 Hello Worldsssssssssssssssss
             </h1>
