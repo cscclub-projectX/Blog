@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col min-h-screen  relative">
     <!-- Top Header for Mobile -->
-  <div class="flex items-center justify-between p-2  shadow md:hidden">
+    <div class="flex items-center justify-between p-2  shadow md:hidden">
       <button 
         @click="toggleLeftSidebar" 
         class=" p-2 rounded-md"
@@ -10,9 +10,8 @@
         {{ isLeftSidebarOpen ? '❌' : '☰' }}
       </button>
 
-      <div class="flex -space-x-5 justify-center">
-        <NuxtImg src="/images/cscc_usdb_logo.jpg" alt="Logo" class="w-12 h-12 rounded-2xl bg-gradient-to-r border-2 border-white from-purple-200 to-blue-200" />
-        <NuxtImg src="/images/image.png" alt="Profile Picture" class="w-12 h-12 rounded-full border-2 border-white" />
+      <div class="flex items-center">
+        <NuxtImg src="/images/cscc_usdb_logo.jpg" alt="Logo" class="w-10 h-10 rounded-2xl" />
       </div>
 
       <button 
@@ -27,28 +26,25 @@
     <div class="flex flex-grow">
       <!-- Left Sidebar -->
       <Sidebar 
-        :class="`fixed left-0 top-0  h-screen transition-all duration-300 
-          ${isLeftSidebarOpen ? 'w-11/12 translate-x-0 md:w-1/6 lg:w-1/6' : 'w-full -translate-x-full'} 
-          md:translate-x-0`" 
+        :class="`fixed left-0 top-0 h-screen transition-all duration-300 z-50
+          ${isLeftSidebarOpen ? 'w-12/12 translate-x-0' : '-translate-x-full'} 
+          md:relative md:translate-x-0 md:w-72`" 
         :closeSidebar="toggleLeftSidebar"
       />
 
       <!-- Main Content -->
       <main 
-        :class="`overflow-y-auto mx-auto min-h-screen transition-all duration-300
-          ${isLeftSidebarOpen && isRightSidebarOpen ? 'w-4/6 ml-1/6' : 
-          isLeftSidebarOpen ? 'w-5/6 ml-1/6' :
-          isRightSidebarOpen ? 'w-5/6' : 'w-full'} 
-          md:w-4/6 md:ml-1/6`"
+        :class="`flex-1 min-h-screen transition-all duration-300 
+          ${isLeftSidebarOpen ? 'md:ml-0' : ''}`"
       >
         <NuxtPage class="p-4"/>
       </main>
 
       <!-- Right Sidebar -->
       <RightSidebar 
-        :class="`fixed right-0 top-0 h-screen transition-all duration-300
-          ${isRightSidebarOpen ? 'w-11/12 translate-x-0 md:w-2/6 lg:w-2/6' : 'w-full translate-x-full'} 
-          md:translate-x-0`" 
+        :class="`fixed right-0 top-0 h-screen transition-all duration-300 z-50
+          ${isRightSidebarOpen ? 'w-10/12 translate-x-0' : 'translate-x-full'} 
+          md:relative md:translate-x-0 md:w-2/6 `" 
         :closeSidebar="toggleRightSidebar"
       />
     </div>

@@ -1,9 +1,12 @@
 <template>
   <nav class=" p-4 bg-white rounded-r-2xl shadow">
     <!-- Close Button -->
-    <button @click="closeSidebar" class="mb-4 text-gray-600 hover:text-gray-800 md:hidden lg:hidden">
-      ❌ <!-- Close icon -->
-    </button>
+    <div class="flex justify-end mb-4">
+      <button @click="closeSidebar" class="text-gray-600 bg-red-200 rounded-full  text-xs   p-2 hover:text-gray-800 md:hidden lg:hidden">
+        ❌ <!-- Close icon -->
+      </button>
+    </div>
+
 
     <!-- Profile Section -->
     <div class="flex flex-col items-center mb-6">

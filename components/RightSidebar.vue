@@ -1,9 +1,11 @@
 <template>
-    <aside class=" p-4 space-y-6 h-screen overflow-y-auto bg-white rounded-l-2xl shadow">
+    <aside class=" p-4 space-y-6 h-screen overflow-y-auto bg-white rounded-l-2xl shadow-2xl md:shadow lg:shadow ">
         <!-- Close Button -->
-        <button @click="closeSidebar" class="mb-4 text-gray-600 hover:text-gray-800  md:hidden lg:hidden">
-            ❌ <!-- Close icon -->
-        </button>
+        <div class="flex justify-start mb-4">
+            <button @click="closeSidebar" class="text-gray-600 bg-red-200 rounded-full  text-xs   p-2 hover:text-gray-800 md:hidden lg:hidden">
+              ❌ <!-- Close icon -->
+            </button>
+          </div>
 
         <!-- Featured Posts -->
         <div class="bg-white rounded-l-2xl p-4 ">
