@@ -1,7 +1,7 @@
 <template>
 
-  <div class="login-container flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white/90 backdrop-blur-sm p-8 md:p-10 rounded-2xl shadow-2xl w-full max-w-md text-center">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white/90 backdrop-blur-sm p-8 md:p-10 border border-gray-200  rounded-2xl  w-full max-w-md text-center">
       <!-- Logo Section -->
       <div class="flex flex-col items-center mb-8">
         <div class="relative group">
@@ -126,13 +126,6 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
-.login-container {
-  background-image: url('/images/DECORATION.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  min-height: 100vh;
-  width: 100%;
-}
+
 </style>
 

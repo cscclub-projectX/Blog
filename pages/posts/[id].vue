@@ -1,6 +1,6 @@
 <template>
     <!-- Houcine was here :) -->
-    <div class="w-full md:max-w-2xl lg:max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-8">
+    <div class="w-full md:max-w-2xl lg:max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-8 h-screen overflow-y-auto hide-scrollbar">
         <!-- Blog's Header  -->
         <div class="mb-3 md:mb-4">
             <div class="flex items-center gap-2 md:gap-3 text-gray-600">

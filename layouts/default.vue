@@ -27,6 +27,7 @@
     <div class="flex flex-grow">
       <!-- Left Sidebar -->
       <Sidebar 
+        v-if="!isLoginOrSignupPage"
         :class="`fixed left-0 top-0 h-screen transition-all duration-300 z-50
           ${isLeftSidebarOpen ? 'w-12/12 translate-x-0' : '-translate-x-full'} 
           md:relative md:translate-x-0 md:w-72`" 
@@ -43,6 +44,7 @@
 
       <!-- Right Sidebar -->
       <RightSidebar 
+        v-if="!isLoginOrSignupPage"
         :class="`fixed right-0 top-0 h-screen transition-all duration-300 z-50
           ${isRightSidebarOpen ? 'w-10/12 translate-x-0' : 'translate-x-full'} 
           md:relative md:translate-x-0 md:w-2/6 `" 
@@ -53,6 +55,13 @@
 </template>
 
 <script setup>
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+const isLoginOrSignupPage = computed(() => {
+  return route.name === 'auth-login' || route.name === 'auth-signup'; // Adjust these names based on your actual route names
+});
+
 const isLeftSidebarOpen = ref(false)
 const isRightSidebarOpen = ref(false)
 
@@ -94,5 +103,13 @@ onMounted(() => {
 .overflow-y-auto {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
 }
 </style>
