@@ -16,7 +16,9 @@ export default defineNuxtConfig({
     '~/assets/css/main.css',
   ],
 
-  modules: [
+
+
+ modules: [
     '@nuxt/image',
     '@nuxt/fonts',
     '@nuxt/icon',
@@ -26,4 +28,15 @@ export default defineNuxtConfig({
   tiptap: {
     prefix: 'Tiptap', //prefix for Tiptap imports, composables not included
   },
+  app: {
+    head: {
+      link: [
+        {
+          rel: 'stylesheet',
+          href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
+        }
+      ]
+    }
+  }
+
 })
