@@ -1,7 +1,7 @@
 <template>
 
-  <div class="login-container flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white/90 backdrop-blur-sm p-8 md:p-10 rounded-2xl shadow-2xl w-full max-w-md text-center">
+  <div class=" flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white/90 backdrop-blur-sm p-8 md:p-10 rounded-2xl border border-gray-200   w-full max-w-md text-center">
       <!-- Logo Section -->
       <div class="flex flex-col items-center mb-8">
         <div class="relative group">
