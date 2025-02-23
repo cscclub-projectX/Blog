@@ -17,7 +17,17 @@ export default defineNuxtConfig({
   ],
 
 
-  modules: ['@nuxt/image', '@nuxt/fonts', '@nuxt/icon'],
+
+ modules: [
+    '@nuxt/image',
+    '@nuxt/fonts',
+    '@nuxt/icon',
+    '@nuxt/content',
+    'nuxt-tiptap-editor',
+  ],
+  tiptap: {
+    prefix: 'Tiptap', //prefix for Tiptap imports, composables not included
+  },
   app: {
     head: {
       link: [
@@ -28,6 +38,5 @@ export default defineNuxtConfig({
       ]
     }
   }
-
 
 })

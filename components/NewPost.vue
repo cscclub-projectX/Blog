@@ -24,9 +24,10 @@
             </div>
         </div>
 
-        <textarea v-model="postContent" placeholder="Write your content here..."
-            class="w-full p-2 border border-blue-200 rounded-2xl resize-none bg-gray-50 text-gray-800 placeholder-gray-400"
-            rows="6"></textarea>
+        <!-- Tiptap Editor for content -->
+        <client-only>
+            <tiptap-editor />
+          </client-only>
 
         <div class="flex items-center justify-end mt-2">
 
@@ -38,36 +39,32 @@
     </div>
 </template>
 
-<script>
-export default {
-    name: 'NewPost',
-    data() {
-        return {
-            postTitle: '',
-            postContent: '',
-            isVisibilityOpen: false,
-            visibility: 'public' // Default visibility
-        }
-    },
-    methods: {
-        toggleVisibility() {
-            this.isVisibilityOpen = !this.isVisibilityOpen;
-        },
-        setVisibility(option) {
-            this.visibility = option;
-            this.isVisibilityOpen = false; // Close the visibility options after selection
-            console.log('Visibility set to:', this.visibility);
-        },
-        submitPost() {
-            if (this.postTitle.trim() && this.postContent.trim()) {
-                // Logic to handle post submission (e.g., API call)
-                console.log('New Post:', { title: this.postTitle, content: this.postContent, visibility: this.visibility });
-                this.postTitle = ''; // Clear the title input after submission
-                this.postContent = ''; // Clear the content after submission
-            }
-        }
+<script setup>
+import { ref } from 'vue';
+import TiptapEditor from './TiptapEditor.vue';
+const postTitle = ref('');
+const postContent = ref('');
+const isVisibilityOpen = ref(false);
+const visibility = ref('public'); // Default visibility
+
+const toggleVisibility = () => {
+    isVisibilityOpen.value = !isVisibilityOpen.value;
+};
+
+const setVisibility = (option) => {
+    visibility.value = option;
+    isVisibilityOpen.value = false; // Close the visibility options after selection
+    console.log('Visibility set to:', visibility.value);
+};
+
+const submitPost = () => {
+    if (postTitle.value.trim() && postContent.value.trim()) {
+        // Logic to handle post submission (e.g., API call)
+        console.log('New Post:', { title: postTitle.value, content: postContent.value, visibility: visibility.value });
+        postTitle.value = ''; // Clear the title input after submission
+        postContent.value = ''; // Clear the content after submission
     }
-}
+};
 </script>
 
 <style scoped>
