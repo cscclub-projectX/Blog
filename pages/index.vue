@@ -2,7 +2,7 @@
     <div class="p-4">
         <!-- New Post Component -->
         <NewPost />
-
+        
         <!-- Feed Section -->
         <div class="space-y-4">
             <div class="bg-white p-4 rounded-lg shadow-md">
