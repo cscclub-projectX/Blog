@@ -1,10 +1,10 @@
 <template>
   <div class="flex flex-col min-h-screen relative overflow-hidden">
     <!-- Top Header for Mobile -->
-    <div class="flex items-center justify-between p-2  shadow md:hidden">
+    <div class="flex items-center justify-between p-2 shadow md:hidden">
       <button 
         @click="toggleLeftSidebar" 
-        class=" p-2 rounded-md"
+        class="p-2 rounded-md"
       >
         <span class="sr-only">Toggle Left Sidebar</span>
         {{ isLeftSidebarOpen ? '❌' : '☰' }}
@@ -17,37 +17,37 @@
 
       <button 
         @click="toggleRightSidebar" 
-        class=" p-2 rounded-md"
+        class="p-2 rounded-md"
       >
         <span class="sr-only">Toggle Right Sidebar</span>
         {{ isRightSidebarOpen ? '❌' : '⋮' }}
       </button>
     </div>
 
-    <div class="flex flex-grow">
-      <!-- Left Sidebar -->
+    <div class="flex flex-grow relative">
+      <!-- Left Sidebar - Fixed -->
       <Sidebar 
         v-if="!isLoginOrSignupPage"
-        :class="`fixed left-0 top-0 h-screen transition-all duration-300 z-50
+        :class="`fixed left-0 top-0 h-screen overflow-y-auto hide-scrollbar transition-all duration-300 z-50
           ${isLeftSidebarOpen ? 'w-12/12 translate-x-0' : '-translate-x-full'} 
-          md:relative md:translate-x-0 md:w-72`" 
+          md:sticky md:top-0 md:translate-x-0 md:w-72`" 
         :closeSidebar="toggleLeftSidebar"
       />
 
-      <!-- Main Content -->
+      <!-- Main Content - Scrollable -->
       <main 
-        :class="`flex-1 min-h-screen transition-all duration-300 
+        :class="`flex-1 min-h-screen transition-all hide-scrollbar duration-300 
           ${isLeftSidebarOpen ? 'ml-0' : ''}`"
       >
         <NuxtPage class="p-2 md:p-6 lg:p-8"/>
       </main>
 
-      <!-- Right Sidebar -->
+      <!-- Right Sidebar - Fixed -->
       <RightSidebar 
         v-if="!isLoginOrSignupPage"
-        :class="`fixed right-0 top-0 h-screen transition-all duration-300 z-50
+        :class="`fixed right-0 top-0 h-screen overflow-y-auto hide-scrollbar transition-all duration-300 z-50
           ${isRightSidebarOpen ? 'w-10/12 translate-x-0' : 'translate-x-full'} 
-          md:relative md:translate-x-0 md:w-2/6 `" 
+          md:sticky md:top-0 md:translate-x-0 md:w-2/6`" 
         :closeSidebar="toggleRightSidebar"
       />
     </div>
@@ -95,21 +95,30 @@ onMounted(() => {
 
 <style scoped>
 /* Hide scrollbar for Chrome, Safari and Opera */
-.overflow-y-auto::-webkit-scrollbar {
+.hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
 
 /* Hide scrollbar for IE, Edge and Firefox */
-.overflow-y-auto {
+.hide-scrollbar {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
-.hide-scrollbar {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+
+/* Set the body to prevent scrolling */
+:global(body) {
+  overflow: hidden;
 }
 
-.hide-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
+/* Ensure the main content area scrolls properly */
+main {
+  overflow-y: auto;
+  height: calc(100vh - 48px); /* Adjust based on your header height */
+}
+
+@media (min-width: 768px) {
+  main {
+    height: 100vh;
+  }
 }
 </style>
