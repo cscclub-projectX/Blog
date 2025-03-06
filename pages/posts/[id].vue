@@ -29,32 +29,35 @@
         </div>
 
         <!-- Blog's Content -->
-        <div class="prose prose-sm md:prose-lg max-w-none mb-6 md:mb-8">
-            <p class="text-sm md:text-base">
-                {{ content }}
-            </p>
-        </div>
+        <article class="prose prose-slate max-w-none mb-6 md:mb-8">
+            <div v-html="markdownContent" class="
+                [&>h1]:text-3xl [&>h1]:font-bold [&>h1]:mb-6
+                [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:mb-4
+                [&>h3]:text-xl [&>h3]:font-bold [&>h3]:mb-3
+                [&>p]:text-gray-600 [&>p]:text-base
+                [&>a]:text-blue-600">
+            </div>
+        </article>
 
         <!-- User Interaction Section -->
         <div class="flex items-center justify-between px-4 md:px-14 py-3 md:py-4 border-t transition-colors duration-300 w-full">
-            
-             <!-- Save Button -->
+            <!-- Save Button -->
             <button @click="toggleBookmark" class="text-gray-500 cursor-pointer hover:text-gray-700">
                 <i :class="['far fa-bookmark', { 'fas text-gray-700': isBookmarked }]"></i>
             </button>
             
-             <!-- Repost Button -->
+            <!-- Repost Button -->
             <button @click="toggleRepost" class="text-gray-500 cursor-pointer hover:text-gray-700">
                 <i :class="['fas fa-retweet', { 'text-gray-700': isReposted }]"></i>
             </button>
-           
+            
             <!-- Like Button -->
             <button @click="toggleLike" class="flex items-center cursor-pointer justify-center gap-1 text-gray-500 hover:text-gray-700">
                 <i :class="['far fa-heart ', { 'fas text-gray-700': isLiked }]"></i>
                 <span>{{ likes }}</span>
             </button>
 
-             <!-- Comment Button -->
+            <!-- Comment Button -->
             <button 
                 @click="toggleCommentInput"
                 class="text-gray-500 cursor-pointer flex items-center justify-center gap-1 hover:text-gray-700"
@@ -71,7 +74,7 @@
 
         <!-- Comments Section -->
         <div class="mt-1 border-t pt-6">
-            <!-- Add Comment - Only show when showCommentInput is true -->
+            <!-- Add Comment -->
             <div v-if="showCommentInput" class="flex gap-3 mb-6">
                 <img 
                     :src="user.avatar"
@@ -90,7 +93,7 @@
                     <div class="flex justify-end gap-2 mt-2">
                         <button 
                             @click="showCommentInput = false"
-                            class=" cursor-pointer px-4 py-1 text-gray-600 rounded-full hover:bg-gray-100"
+                            class="px-4 py-1 text-gray-600 rounded-full hover:bg-gray-100 cursor-pointer"
                         >
                             Cancel
                         </button>
@@ -107,7 +110,7 @@
 
             <!-- Comments List -->
             <div class="space-y-4">
-                <div v-for="comment in comments" :key="comment.id" class="flex gap-3">
+                <div v-for="comment in displayedComments" :key="comment.id" class="flex gap-3">
                     <img 
                         :src="comment.user.avatar"
                         :alt="comment.user.fullName"
@@ -260,18 +263,30 @@
                                 @click="toggleShowAllReplies(comment)"
                                 class="ml-11 text-sm text-gray-600 hover:text-gray-800 cursor-pointer"
                             >
-                                {{ comment.showAllReplies ? 'Show less replies' : 'Show more replies' }}
+                                {{ comment.showAllReplies ? 'Hide replies' : `Show ${comment.replies.length} ${comment.replies.length === 1 ? 'reply' : 'replies'}` }}
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Show More Comments Button -->
+            <button 
+                v-if="shouldShowMoreComments"
+                @click="toggleShowAllComments"
+                class="w-full text-sm text-gray-600 hover:text-gray-800 cursor-pointer py-2"
+            >
+                {{ showAllComments ? 'Show less comments' : `Show ${comments.length - 3} more comments` }}
+            </button>
         </div>
     </div>
 </template>
 
 <script setup>
 import { ref, computed, nextTick } from 'vue'
+import MarkdownIt from 'markdown-it'
+
+const md = new MarkdownIt()
 
 // User information object
 const user = ref({
@@ -281,13 +296,30 @@ const user = ref({
 })
 
 // Post interaction states
+const date = ref('Feb 23, 2025')
 const likes = ref(122)
 const isLiked = ref(false)
 const isBookmarked = ref(false)
-const date = ref('Feb 23, 2025')
+const isReposted = ref(false)
 
 // Blog post content
-const content = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.`
+const content = `
+# Welcome to My Nuxt.js Blog
+This is a **Markdown** example that you can use in your Nuxt.js project.
+
+## Features
+
+- ✅ **bold**, *italic*, \`inline code\`, *[link](https://www.google.com)*
+
+- ✅ Code blocks:
+
+\`\`\`javascript
+console.log('Hello, Nuxt.js!');
+\`\`\`
+
+### Hellllloo
+
+`
 
 // Comment input state
 const newComment = ref('')
@@ -328,20 +360,6 @@ const comments = ref([
         }
     }
 ])
-
-// Post interaction handlers
-const toggleLike = () => {
-    isLiked.value = !isLiked.value
-    likes.value += isLiked.value ? 1 : -1 // Increment/decrement likes
-}
-
-const toggleBookmark = () => {
-    isBookmarked.value = !isBookmarked.value
-}
-
-const copyLink = () => {
-    navigator.clipboard.writeText(window.location.href)
-}
 
 // Comment input handling
 const toggleCommentInput = () => {
@@ -420,28 +438,45 @@ const toggleReplyLike = (reply) => {
     reply.likes += reply.isLiked ? 1 : -1
 }
 
+// Comment display management
+const displayedComments = computed(() => {
+    if (showAllComments.value || comments.value.length <= 3) {
+        return comments.value
+    }
+    return comments.value.slice(0, 3)
+})
+
+const shouldShowMoreComments = computed(() => {
+    return comments.value.length > 3
+})
+
+// Add this ref
+const showAllComments = ref(false)
+
+// Add this function
+const toggleShowAllComments = () => {
+    showAllComments.value = !showAllComments.value
+}
+
+// Modify the displayedReplies function
+const displayedReplies = (comment) => {
+    if (!comment.showAllReplies) {
+        return [] // Return empty array if replies are not expanded
+    }
+    return comment.replies // Show all replies when expanded
+}
+
+// Modify shouldShowMoreReplies to show button for any replies
+const shouldShowMoreReplies = (comment) => {
+    return comment.replies.length > 0
+}
+
 // Total comment count including replies
 const commentCount = computed(() => {
     return comments.value.reduce((total, comment) => {
         return total + 1 + (comment.replies?.length || 0)
     }, 0)
 })
-
-// Reply display management
-const displayedReplies = (comment) => {
-    if (comment.showAllReplies || comment.replies.length <= 2) {
-        return comment.replies
-    }
-    return comment.replies.slice(0, 2) // Show only first 2 replies
-}
-
-const shouldShowMoreReplies = (comment) => {
-    return comment.replies.length > 2
-}
-
-const toggleShowAllReplies = (comment) => {
-    comment.showAllReplies = !comment.showAllReplies
-}
 
 // Add isPostOwner prop
 const props = defineProps({
@@ -477,4 +512,32 @@ const deleteReply = (comment, reply) => {
         comment.replies.splice(replyIndex, 1)
     }
 }
+
+// Add this function back after shouldShowMoreReplies
+const toggleShowAllReplies = (comment) => {
+    comment.showAllReplies = !comment.showAllReplies
+}
+
+// Add back the interaction handlers
+const toggleLike = () => {
+    isLiked.value = !isLiked.value
+    likes.value += isLiked.value ? 1 : -1 // Increment/decrement likes
+}
+
+const toggleBookmark = () => {
+    isBookmarked.value = !isBookmarked.value
+}
+
+const copyLink = () => {
+    navigator.clipboard.writeText(window.location.href)
+}
+
+const toggleRepost = () => {
+    isReposted.value = !isReposted.value
+}
+
+// Add this computed property
+const markdownContent = computed(() => {
+    return md.render(content)
+})
 </script>

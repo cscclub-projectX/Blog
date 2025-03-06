@@ -7,19 +7,17 @@
             <input v-model="postTitle" type="text" placeholder="Title of your post..."
                 class="flex-1 p-2 bg-white border-none  focus:outline-none rounded-2xl" />
             <button @click="toggleVisibility" class="p-2 text-gray-600 hover:text-gray-800">
-                <Icon name="solar:share-circle-bold-duotone"  class="text-3xl"></Icon> <!-- Default icon for visibility -->
+                <i class="fas fa-share-alt text-xl"></i>
             </button>
             <div v-if="isVisibilityOpen" class="absolute right-1 bg-gray-100  rounded-2xl p-2 flex space-x-3">
                 <button @click="setVisibility('public')" class="flex items-center text-gray-600 hover:text-gray-800">
-                    <Icon name="solar:earth-bold" class="text-2xl"></Icon> <!-- Earth Icon for Public -->
+                    <i class="fas fa-globe text-xl"></i>
                 </button>
                 <button @click="setVisibility('friends')" class="flex items-center text-gray-600 hover:text-gray-800">
-                    <Icon name="solar:users-group-two-rounded-bold-duotone" class="text-2xl"></Icon>
-                    <!-- Friends Icon -->
+                    <i class="fas fa-users text-xl"></i>
                 </button>
                 <button @click="setVisibility('onlyMe')" class="flex items-center text-gray-600 hover:text-gray-800">
-                    <Icon name="solar:lock-password-bold-duotone" class="text-2xl"></Icon>
-                    <!-- Lock Icon for Only Me -->
+                    <i class="fas fa-lock text-xl"></i>
                 </button>
             </div>
         </div>
