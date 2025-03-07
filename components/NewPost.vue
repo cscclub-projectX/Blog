@@ -21,7 +21,36 @@
                 </button>
             </div>
         </div>
-
+        <div>
+            <div v-if="showEditor" class="bg-white rounded-2xl p-4 mb-4">
+                <h2 class="text-lg font-semibold mb-2">Cover Image</h2>
+                
+                <!-- Image preview area -->
+                <div v-if="coverImagePreview" class="mb-3">
+                    <img :src="coverImagePreview" alt="Cover image preview" class="w-full h-48 object-cover rounded-lg" />
+                    <button @click="removeCoverImage" class="mt-2 text-red-500 text-sm flex items-center">
+                        <Icon name="solar:trash-bin-trash-bold" class="mr-1" />
+                        Remove image
+                    </button>
+                </div>
+                
+                <!-- Upload button -->
+                <div v-else class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-50 transition cursor-pointer"
+                     @click="$refs.coverImageInput.click()">
+                    <Icon name="solar:gallery-add-bold" class="text-3xl text-gray-400 mb-2" />
+                    <p class="text-gray-500">Click to upload a cover image</p>
+                    <p class="text-xs text-gray-400 mt-1">Recommended: 1200×630px, JPG or PNG</p>
+                </div>
+                
+                <input 
+                    ref="coverImageInput"
+                    type="file" 
+                    accept="image/*" 
+                    class="hidden" 
+                    @change="uploadCoverImage" 
+                />
+            </div>
+        </div>
         <!-- Rich Text Editor -->
         <div v-if="showEditor" class="bg-white rounded-2xl p-4 mb-4">
             <div class="editor-menu flex flex-wrap gap-2 mb-2 border-b pb-2">
@@ -136,6 +165,8 @@ const visibility = ref('public'); // Default visibility
 const showEditor = ref(false);
 const showMarkdown = ref(false);
 const markdownContent = ref('');
+const coverImagePreview = ref(null);
+const coverImageFile = ref(null);
 
 // Create the editor immediately
 const editor = useEditor({
@@ -229,15 +260,26 @@ const submitPost = async () => {
             }
             
             // Prepare post data
+            let coverImageId = null;
+            if (coverImageFile.value) {
+                try {
+                    coverImageId = await uploadCoverImageToStorage(coverImageFile.value);
+                } catch (error) {
+                    console.error('Error uploading cover image:', error);
+                    // Decide if you want to continue with post creation or abort
+                }
+            }
+            
             const postData = {
                 title: postTitle.value,
-                content: markdown, // Store as markdown
+                Markdown: markdown, // Store as markdown
                 authorId: currentUser.$id,
                 status: 'published', // or 'draft' based on your UI
                 tags: [], // You could add tag functionality later
                 views: 0,
                 likes: 0,
-                visibility: visibility.value
+                createdAt: new Date(),
+                coverImage: `https://appwrite-os08sgw04g4swk0s8owwoooc.beamzy.net/v1/storage/buckets/67c9dbab003009fc0a92/files/${coverImageId}/view?project=project-x&project=project-x`,
             };
             
             // Create post in Appwrite
@@ -271,14 +313,41 @@ const submitPost = async () => {
     }
 };
 
-// Add a method to handle cover image upload if needed
-const uploadCoverImage = async (file) => {
+const uploadCoverImage = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.includes('image/')) {
+        alert('Please upload an image file');
+        return;
+    }
+    
+    coverImageFile.value = file;
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        coverImagePreview.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+};
+
+const removeCoverImage = () => {
+    coverImagePreview.value = null;
+    coverImageFile.value = null;
+    if (this.$refs.coverImageInput) {
+        this.$refs.coverImageInput.value = '';
+    }
+};
+
+const uploadCoverImageToStorage = async (file) => {
     try {
         const response = await storage.createFile(
             STORAGE_BUCKET_ID,
             ID.unique(),
             file
         );
+        console.log('Cover image uploaded successfully:', response);
         return response.$id; // Return the file ID for reference in the post
     } catch (error) {
         console.error('Error uploading cover image:', error);

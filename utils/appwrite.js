@@ -1,4 +1,4 @@
-import { Client, Account} from 'appwrite';
+import { Client, Account, Databases, Storage} from 'appwrite';
 
 export const client = new Client();
 
@@ -7,6 +7,8 @@ client
     .setProject('project-x'); // Replace with your project ID
 
 export const account = new Account(client);
+export const databases = new Databases(client);
+export const storage = new Storage(client);
 export { ID } from 'appwrite';
 // Appwrite configuration constants
 export const DATABASE_ID = 'blogv1'; // Replace with your actual database ID

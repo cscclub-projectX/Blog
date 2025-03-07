@@ -14,12 +14,7 @@ export default defineNuxtConfig({
   ],
 
 
- modules: [
-    '@nuxt/image',
-    '@nuxt/fonts',
-    '@nuxt/icon',
-    '@nuxt/content',
-  ],
+ modules: ['@nuxt/image', '@nuxt/fonts', '@nuxt/icon', '@nuxt/content', '@nuxtjs/mdc'],
   app: {
     head: {
       link: [
