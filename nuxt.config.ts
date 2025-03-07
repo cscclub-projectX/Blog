@@ -29,6 +29,16 @@ export default defineNuxtConfig({
         }
       ],
     }
-  }
+  },
 
+  // Disable SSR for auth-related routes
+  // routeRules: {
+  //   // Disable SSR for specific routes
+  //   '/': { ssr: false },
+  //   '/auth/**': { ssr: false },
+  //   // Add other routes that need client-side auth
+  // },
+  ssr: false,
+  // Alternatively, you can disable SSR globally if your entire app relies on client-side auth
+  // ssr: false,
 })

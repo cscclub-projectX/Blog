@@ -5,6 +5,7 @@
       <button 
         @click="toggleLeftSidebar" 
         class="p-2 rounded-md"
+        v-if="!showLoginDialog"
       >
         <span class="sr-only">Toggle Left Sidebar</span>
         {{ isLeftSidebarOpen ? '❌' : '☰' }}
@@ -18,6 +19,7 @@
       <button 
         @click="toggleRightSidebar" 
         class="p-2 rounded-md"
+        v-if="!showLoginDialog"
       >
         <span class="sr-only">Toggle Right Sidebar</span>
         {{ isRightSidebarOpen ? '❌' : '⋮' }}
@@ -27,8 +29,8 @@
     <div class="flex flex-grow relative">
       <!-- Left Sidebar - Fixed -->
       <Sidebar 
-        v-if="!isLoginOrSignupPage"
-        :class="`fixed left-0 top-0 h-screen overflow-y-auto hide-scrollbar transition-all duration-300 z-50
+        v-if="!isLoginOrSignupPage && !showLoginDialog"
+        :class="`fixed left-0 top-0 h-screen overflow-y-auto hide-scrollbar transition-all duration-300 z-40
           ${isLeftSidebarOpen ? 'w-12/12 translate-x-0' : '-translate-x-full'} 
           md:sticky md:top-0 md:translate-x-0 md:w-72`" 
         :closeSidebar="toggleLeftSidebar"
@@ -37,15 +39,15 @@
       <!-- Main Content - Scrollable -->
       <main 
         :class="`flex-1 min-h-screen transition-all hide-scrollbar duration-300 
-          ${isLeftSidebarOpen ? 'ml-0' : ''}`"
+          ${isLeftSidebarOpen && !showLoginDialog ? 'ml-0' : ''}`"
       >
         <NuxtPage class="p-2 md:p-6 lg:p-8"/>
       </main>
 
       <!-- Right Sidebar - Fixed -->
       <RightSidebar 
-        v-if="!isLoginOrSignupPage"
-        :class="`fixed right-0 top-0 h-screen overflow-y-auto hide-scrollbar transition-all duration-300 z-50
+        v-if="!isLoginOrSignupPage && !showLoginDialog"
+        :class="`fixed right-0 top-0 h-screen overflow-y-auto hide-scrollbar transition-all duration-300 z-40
           ${isRightSidebarOpen ? 'w-10/12 translate-x-0' : 'translate-x-full'} 
           md:sticky md:top-0 md:translate-x-0 md:w-2/6`" 
         :closeSidebar="toggleRightSidebar"
@@ -61,6 +63,9 @@ const route = useRoute();
 const isLoginOrSignupPage = computed(() => {
   return route.name === 'auth-login' || route.name === 'auth-signup'; // Adjust these names based on your actual route names
 });
+
+// Get the login dialog state from useState
+const showLoginDialog = useState('showLoginDialog', () => false);
 
 const isLeftSidebarOpen = ref(false)
 const isRightSidebarOpen = ref(false)
@@ -90,6 +95,17 @@ onMounted(() => {
   onUnmounted(() => {
     window.removeEventListener('resize', handleResize)
   })
+})
+
+// Watch for changes in the login dialog state
+watch(showLoginDialog, (newValue) => {
+  if (newValue) {
+    // When dialog opens, ensure sidebars are closed on mobile
+    if (window.innerWidth < 768) {
+      isLeftSidebarOpen.value = false
+      isRightSidebarOpen.value = false
+    }
+  }
 })
 </script>
 

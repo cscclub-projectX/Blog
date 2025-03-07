@@ -120,8 +120,14 @@
 import { useEditor, EditorContent } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
-import { Markdown } from 'tiptap-markdown'; // Changed to named import
+import { Markdown } from 'tiptap-markdown';
+import { client, account, ID } from '~/utils/appwrite';
+import { Databases, Storage } from 'appwrite';
+import { DATABASE_ID, POSTS_COLLECTION_ID, STORAGE_BUCKET_ID } from '~/utils/appwrite';
 
+// Initialize Appwrite services
+const databases = new Databases(client);
+const storage = new Storage(client);
 
 const postTitle = ref('');
 const postContent = ref('');
@@ -208,24 +214,75 @@ const setVisibility = (option) => {
     console.log('Visibility set to:', visibility.value);
 };
 
-const submitPost = () => {
+const submitPost = async () => {
     if (postTitle.value.trim() && postContent.value.trim()) {
-        // Logic to handle post submission (e.g., API call)
-        console.log('New Post:', { 
-            title: postTitle.value, 
-            content: postContent.value, 
-            visibility: visibility.value 
-        });
-        postTitle.value = ''; // Clear the title input after submission
-        if (editor.value) {
-            editor.value.commands.setContent(''); // Clear the editor content
+        try {
+            // Get current user
+            const currentUser = await account.get();
+            
+            // Get markdown content
+            let markdown = '';
+            if (editor.value) {
+                markdown = editor.value.storage.markdown.getMarkdown();
+            } else {
+                markdown = markdownContent.value;
+            }
+            
+            // Prepare post data
+            const postData = {
+                title: postTitle.value,
+                content: markdown, // Store as markdown
+                authorId: currentUser.$id,
+                status: 'published', // or 'draft' based on your UI
+                tags: [], // You could add tag functionality later
+                views: 0,
+                likes: 0,
+                visibility: visibility.value
+            };
+            
+            // Create post in Appwrite
+            const response = await databases.createDocument(
+                DATABASE_ID,
+                POSTS_COLLECTION_ID,
+                ID.unique(),
+                postData
+            );
+            
+            console.log('Post created successfully:', response);
+            
+            // Clear form after successful submission
+            postTitle.value = '';
+            if (editor.value) {
+                editor.value.commands.setContent('');
+            }
+            postContent.value = '';
+            markdownContent.value = '';
+            showEditor.value = false;
+            showMarkdown.value = false;
+            
+            // You could add a success notification here
+            
+        } catch (error) {
+            console.error('Error creating post:', error);
+            alert('Failed to create post. Please try again.');
         }
-        postContent.value = ''; // Clear the content after submission
-        markdownContent.value = ''; // Clear markdown content
-        showEditor.value = false; // Hide the editor after posting
-        showMarkdown.value = false; // Reset to rich text view
     } else {
         alert('Please add both a title and content to your post');
+    }
+};
+
+// Add a method to handle cover image upload if needed
+const uploadCoverImage = async (file) => {
+    try {
+        const response = await storage.createFile(
+            STORAGE_BUCKET_ID,
+            ID.unique(),
+            file
+        );
+        return response.$id; // Return the file ID for reference in the post
+    } catch (error) {
+        console.error('Error uploading cover image:', error);
+        throw error;
     }
 };
 </script>
