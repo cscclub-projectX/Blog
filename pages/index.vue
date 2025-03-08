@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 bg-gray-100">
+  <div class="p-4 bg-gray-100 md:mb-3 sm:mb-15 xs:mb-15">
     <!-- Login Dialog -->
     <LoginDialog />
 
