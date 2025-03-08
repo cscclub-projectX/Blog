@@ -14,7 +14,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
       await account.createEmailSession(email, password)
       
       // Update authentication state
-      await checkAuth()
+      // await checkAuth()
       
       // Hide login dialog
       const showLoginDialog = useState('showLoginDialog')

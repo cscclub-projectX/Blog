@@ -13,6 +13,16 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         try {
             const user = await account.get()
             useState('currentUser', () => user)
+            try {
+                const response = await databases.listDocuments(
+                  DATABASE_ID,
+                  USERS_COLLECTION_ID,
+                  [Query.equal('$id',  user.$id )]
+                );
+                useState('Profile', () => response.documents[0])
+            } catch (userError) {
+                console.warn('Could not get user details, but session is valid')
+            }
         } catch (userError) {
             console.warn('Could not get user details, but session is valid')
         }

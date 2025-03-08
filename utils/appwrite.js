@@ -14,3 +14,4 @@ export { ID } from 'appwrite';
 export const DATABASE_ID = 'blogv1'; // Replace with your actual database ID
 export const POSTS_COLLECTION_ID = 'posts'; // Collection ID for posts
 export const STORAGE_BUCKET_ID = '67c9dbab003009fc0a92'; // Storage bucket ID for files/images
+export const USERS_COLLECTION_ID = 'users'; // Collection ID for users

@@ -3,8 +3,11 @@
         <!-- Login Dialog -->
         <LoginDialog />
         
+        <!-- Profile Dialog -->
+        <ProfileDialog :show="showProfileDialog" @close="showProfileDialog = false" />
+        
         <!-- New Post Component -->
-        <NewPost />
+        <NewPost :disabled="!hasProfile" @request-profile="showProfileDialog = true" :currentUser="currentUser" :Profile="Profile" />
         
         <!-- Feed Section -->
         <div class="space-y-4">
@@ -17,14 +20,32 @@
             <div v-else-if="featuredPosts.length === 0" class="text-center py-4">
                 <p>No posts found.</p>
             </div>
-            <div v-else v-for="post in featuredPosts" :key="post.id" class="bg-white p-4 rounded-lg shadow-md">
+            <div v-else v-for="post in featuredPosts" :key="post.id" class="bg-white p-4 rounded-lg ">
                 <div class="flex items-center mb-2">
-                    <img :src="post.authorAvatar" alt="Author" class="w-8 h-8 rounded-full mr-2" />
-                    <span class="font-medium">{{ post.author }}</span>
+                    <img :src="post.authorAvatar" alt="Author" class="w-10 h-10 rounded-full mr-2" />
+                    <div class="flex flex-col">
+                        <span class="font-medium">{{ post.authorName }}</span>
+                        <span class="text-gray-500 text-sm">{{ post.authorUsername }}</span>
+                    </div>
                 </div>
                 <h3 class="font-semibold">{{ post.title }}</h3>
                 <MDC :value="post.excerpt" tag="article" />
-                <img v-if="post.banner" :src="post.banner" alt="Post banner" class="w-full h-40 object-cover mt-2 rounded-lg" />
+                <img v-show="post.banner" :src="post.banner" alt="Post banner" class="w-full h-40 object-cover mt-2 rounded-lg" />
+                <div class="flex items-center mt-3 text-gray-500">
+                    <div class="flex items-center mr-4">
+                        <Icon name="solar:eye-bold" class="mr-1" />
+                        <span>{{ post.views }}</span>
+                    </div>
+                    
+                    <button @click="toggleLike(post)" class="flex items-center mr-4 focus:outline-none">
+                        <Icon :name="post.userLiked ? 'solar:heart-bold' : 'solar:heart-outline'" 
+                              :class="post.userLiked ? 'text-red-500' : 'text-gray-500'" 
+                              class="mr-1" />
+                        <span>{{ post.likes }}</span>
+                    </button>
+                    
+                    <span class="text-gray-500 text-sm ml-auto">{{ new Date(post.createdAt).toLocaleString() }}</span>
+                </div>
             </div>
         </div>
     </div>
@@ -33,39 +54,184 @@
 <script setup>
 import NewPost from '@/components/NewPost.vue';
 import LoginDialog from '@/components/LoginDialog.vue';
-import { ref, onMounted } from 'vue';
-import { account, databases } from '~/utils/appwrite';
+import ProfileDialog from '@/components/ProfileDialog.vue';
+import { ref, onMounted, computed, onUnmounted } from 'vue';
+import { account, databases, client } from '~/utils/appwrite';
 import { Query } from 'appwrite';
-import { DATABASE_ID, POSTS_COLLECTION_ID } from '~/utils/appwrite';
+import { DATABASE_ID, POSTS_COLLECTION_ID, USERS_COLLECTION_ID } from '~/utils/appwrite';
 
 // Define middleware
 definePageMeta({
   middleware: ['auth']
 });
 
-// const isAuthenticated = useState('isAuthenticated', () => false);
-
-// // Check authentication status on page load
-// onMounted(async () => {
-//   try {
-//     const session = await account.getSession('current');
-//     if (session) {
-//       isAuthenticated.value = true;
-//     }
-//   } catch (error) {
-//     console.log('No active session');
-//     isAuthenticated.value = false;
-//   }
-// });
-
 const featuredPosts = ref([]);
 const isLoading = ref(true);
 const error = ref(null);
+const currentUser = useState('currentUser', () => null);
+const hasProfile = ref(false);
+const Profile = useState('Profile', () => null);
+const showProfileDialog = ref(false);
+const userLikedPosts = ref(new Set());
+
+// Realtime subscription
+let unsubscribe = null;
+
+// Check if user has a profile
+const checkUserProfile = async (userId) => {
+  try {
+    const response = await databases.listDocuments(
+      DATABASE_ID,
+      USERS_COLLECTION_ID,
+      [Query.equal('$id', userId)]
+    );
+    Profile.value = response.documents[0];
+    if (response.documents.length > 0) {
+      // currentUser.value = response.documents[0];
+
+      // Check if required profile fields are filled
+      const profile = response.documents[0];
+      hasProfile.value = !!(profile.name && profile.username);
+    } else {
+      hasProfile.value = false;
+      showProfileDialog.value = true; // Show profile dialog if no profile exists
+    }
+  } catch (err) {
+    console.error('Error checking user profile:', err);
+    hasProfile.value = false;
+  }
+};
+
+// Increment view count for a post
+const incrementViews = async (postId) => {
+  try {
+    const post = featuredPosts.value.find(p => p.id === postId);
+    if (!post || post.viewIncremented) return;
+    
+    // Mark as incremented to prevent multiple increments
+    post.viewIncremented = true;
+    
+    // Get current post data
+    const postDoc = await databases.getDocument(
+      DATABASE_ID,
+      POSTS_COLLECTION_ID,
+      postId
+    );
+    
+    // Increment views
+    const updatedViews = (postDoc.views || 0) + 1;
+    
+    // Update in Appwrite
+    await databases.updateDocument(
+      DATABASE_ID,
+      POSTS_COLLECTION_ID,
+      postId,
+      { views: updatedViews }
+    );
+    
+    // Update local state
+    post.views = updatedViews;
+  } catch (err) {
+    console.error('Error incrementing views:', err);
+  }
+};
+
+// Toggle like for a post
+const toggleLike = async (post) => {
+  if (!currentUser.value) {
+    alert('Please log in to like posts');
+    return;
+  }
+  
+  try {
+    const userId = currentUser.value.$id;
+    const postId = post.id;
+    
+    // Get current post data
+    const postDoc = await databases.getDocument(
+      DATABASE_ID,
+      POSTS_COLLECTION_ID,
+      postId
+    );
+    
+    // Check if user already liked this post
+    const likedBy = postDoc.likedBy || [];
+    const userIndex = likedBy.indexOf(userId);
+    
+    let updatedLikes = postDoc.likes || 0;
+    let updatedLikedBy = [...likedBy];
+    
+    if (userIndex === -1) {
+      // User hasn't liked the post yet, so add like
+      updatedLikes++;
+      updatedLikedBy.push(userId);
+      userLikedPosts.value.add(postId);
+      post.userLiked = true;
+    } else {
+      // User already liked the post, so remove like
+      updatedLikes = Math.max(0, updatedLikes - 1);
+      updatedLikedBy.splice(userIndex, 1);
+      userLikedPosts.value.delete(postId);
+      post.userLiked = false;
+    }
+    
+    // Update in Appwrite
+    await databases.updateDocument(
+      DATABASE_ID,
+      POSTS_COLLECTION_ID,
+      postId,
+      { 
+        likes: updatedLikes,
+        likedBy: updatedLikedBy
+      }
+    );
+    
+    // Update local state
+    post.likes = updatedLikes;
+  } catch (err) {
+    console.error('Error toggling like:', err);
+  }
+};
+
+// Subscribe to realtime updates for posts
+const subscribeToRealtimeUpdates = () => {
+  unsubscribe = client.subscribe(`databases.${DATABASE_ID}.collections.${POSTS_COLLECTION_ID}.documents`, response => {
+    // Handle realtime updates
+    if (response.events.includes('databases.*.collections.*.documents.*.update')) {
+      const updatedDoc = response.payload;
+      
+      // Find and update the post in our local state
+      const postIndex = featuredPosts.value.findIndex(p => p.id === updatedDoc.$id);
+      if (postIndex !== -1) {
+        // Update only the likes and views counts
+        featuredPosts.value[postIndex].likes = updatedDoc.likes || 0;
+        featuredPosts.value[postIndex].views = updatedDoc.views || 0;
+        
+        // Update liked status if current user is available
+        if (currentUser.value) {
+          const userId = currentUser.value.$id;
+          const likedBy = updatedDoc.likedBy || [];
+          featuredPosts.value[postIndex].userLiked = likedBy.includes(userId);
+        }
+      }
+    }
+  });
+};
 
 // Fetch posts from Appwrite on component mount
 onMounted(async () => {
   try {
     isLoading.value = true;
+    
+    // Check if user is logged in and has a profile
+    try {
+      const session = await account.getSession('current');
+      if (session) {
+        await checkUserProfile(session.userId);
+      }
+    } catch (error) {
+      console.log('No active session');
+    }
     
     // Replace these values with your actual database and collection IDs
     const databaseId = DATABASE_ID;
@@ -80,21 +246,52 @@ onMounted(async () => {
       ]
     );
     
-    featuredPosts.value = response.documents.map(doc => ({
-      id: doc.$id,
-      author: doc.authorName || 'Anonymous', // Adjust based on your schema
-      authorAvatar: doc.authorAvatar || 'https://via.placeholder.com/150', // Default avatar if none exists
-      title: doc.title,
-      excerpt: doc.Markdown ? doc.Markdown.substring(0, 200) + '...' : '', // First 200 chars of content
-      banner: doc.coverImage || null,
-      // Add any other fields you need
+    featuredPosts.value = await Promise.all(response.documents.map(async doc => {
+      // Check if current user has liked this post
+      const userLiked = currentUser.value && 
+                        doc.likedBy && 
+                        doc.likedBy.includes(currentUser.value.$id);
+      
+      if (userLiked) {
+        userLikedPosts.value.add(doc.$id);
+      }
+      
+      return {
+        id: doc.$id,
+        authorName: doc.authorId.name || 'Anonymous',
+        authorUsername: doc.authorId.username || 'Anonymous',
+        authorAvatar: doc.authorId.profileImage || 'https://via.placeholder.com/150',
+        title: doc.title,
+        excerpt: doc.Markdown ? doc.Markdown.substring(0, 200) + '...' : '',
+        banner: doc.coverImage || null,
+        createdAt: doc.createdAt,
+        views: doc.views || 0,
+        likes: doc.likes || 0,
+        userLiked: userLiked,
+        viewIncremented: false
+      };
     }));
+    
+    // Increment view count for all visible posts
+    for (const post of featuredPosts.value) {
+      await incrementViews(post.id);
+    }
+    
+    // Subscribe to realtime updates
+    subscribeToRealtimeUpdates();
     
     isLoading.value = false;
   } catch (err) {
     console.error('Error fetching posts:', err);
     error.value = 'Failed to load posts';
     isLoading.value = false;
+  }
+});
+
+// Clean up subscription when component is unmounted
+onUnmounted(() => {
+  if (unsubscribe) {
+    unsubscribe();
   }
 });
 </script>
