@@ -62,7 +62,7 @@
           <div class="w-full h-40">
             <img v-if="post.banner" :src="post.banner" alt="Post banner" 
               class="w-full h-40 object-cover" :class="{'opacity-50': post.isDeletedAt}">
-            <div v-else class="w-full h-40 bg-gray-100 flex items-center justify-center" :class="{'opacity-50': post.isDeletedAt}">
+            <div v-else class="w-full h-40  flex items-center justify-center" :class="{'opacity-50': post.isDeletedAt}">
               <Icon name="solar:gallery-wide-bold" class="text-4xl text-gray-300" />
             </div>
           </div>

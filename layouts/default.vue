@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col min-h-screen relative overflow-hidden bg-gray-100">
+  <div class="flex flex-col min-h-screen relative overflow-hidden ">
     <!-- Top Header for Mobile -->
     <div v-if="!isLoginOrSignupPage" class="flex items-center justify-between p-2 shadow md:hidden">
       <button 

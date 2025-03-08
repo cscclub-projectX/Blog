@@ -110,7 +110,7 @@
             <editor-content v-else :editor="editor" class="min-h-[150px] focus:outline-none" />
         </div>
     <!-- Tags Input Section -->
-    <div v-if="showEditor" class="bg-white rounded-2xl p-4 mb-4">
+    <div v-if="false" class="bg-white rounded-2xl p-4 mb-4">
         <h2 class="text-lg font-semibold mb-2">Tags</h2>
         <div class="relative">
             <div class="flex flex-wrap gap-2 items-center p-2 border border-gray-300 rounded-lg min-h-[42px]">
