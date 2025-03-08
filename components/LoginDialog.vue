@@ -264,7 +264,7 @@ const signup = async () => {
         username: username.value,
         email: email.value,
         bio: '',
-        profileImage: 'https://via.placeholder.com/150',
+        profileImage: 'https://appwrite-os08sgw04g4swk0s8owwoooc.beamzy.net/v1/storage/buckets/67c9dbab003009fc0a92/files/67ccc21a001700bd9df3/view?project=project-x&project=project-x&mode=admin',
         createdAt: new Date().toISOString()
       }
     )

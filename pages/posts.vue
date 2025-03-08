@@ -58,9 +58,14 @@
             </div>
           </div>
           
-          <!-- Post image -->
-          <img :src="post.banner || '/images/default-post.jpg'" alt="Post banner" 
-            class="w-full h-40 object-cover" :class="{'opacity-50': post.isDeletedAt}">
+          <!-- Post image or placeholder -->
+          <div class="w-full h-40">
+            <img v-if="post.banner" :src="post.banner" alt="Post banner" 
+              class="w-full h-40 object-cover" :class="{'opacity-50': post.isDeletedAt}">
+            <div v-else class="w-full h-40  flex items-center justify-center" :class="{'opacity-50': post.isDeletedAt}">
+              <Icon name="solar:gallery-wide-bold" class="text-4xl text-gray-300" />
+            </div>
+          </div>
           
           <!-- Post info -->
           <div class="p-4" :class="{'opacity-70': post.isDeletedAt}">

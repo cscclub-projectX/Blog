@@ -29,15 +29,17 @@ In **Appwrite**, we need to create **three collections**:
 |--------------|----------------|-------------|----------------|
 | `id`        | String (Auto)   | ✅ Yes       | Unique post ID (Appwrite auto-generates). |
 | `title`     | String          | ✅ Yes       | Blog post title. |
-| `content`   | Rich Text (Markdown) | ✅ Yes       | Blog post content. |
+| `Markdown`   | Rich Text (Markdown) | ✅ Yes       | Blog post content. |
 | `coverImage` | File (Appwrite Storage) | ❌ No | Featured image for the post. |
 | `authorId`  | String (Relation → Users) | ✅ Yes       | Links post to its author. |
 | `tags`      | Array of Strings | ❌ No       | List of post tags/categories. |
-| `views`     | Integer         | ✅ Yes (default 0) | Tracks post views. |
-| `likes`     | Integer         | ✅ Yes (default 0) | Tracks likes. |
-| `status`    | Enum (`draft` / `published`) | ✅ Yes | Post status (draft or published). |
+| `views`     | Integer         | ❌ No (default 0) | Tracks post views. |
+| `likes`     | Integer         | ❌ No (default 0) | Tracks likes. |
+| `likedBy`   | Array of Strings | ❌ No       | List of post tags/categories. |
+| `status`    | Enum (`draft` / `published`) | ❌ No (default `published`) | Post status (draft or published). |
+| `isHidden`    | boolean (`false` / `true`) | ❌ No  (default `false`) | Post status (draft or published). |
 | `createdAt` | Date (Auto)      | ✅ Yes       | Date of creation. |
-
+| `isDeletedAt` | Date (Auto)    | ❌ No      | Date of deletion. |
 ---
 
 ## **3️⃣ Comments Collection (`comments`)** (Optional)  
@@ -48,8 +50,11 @@ In **Appwrite**, we need to create **three collections**:
 | `id`      | String (Auto)   | ✅ Yes       | Unique comment ID. |
 | `postId`  | String (Relation → Posts) | ✅ Yes       | Links comment to a post. |
 | `authorId` | String (Relation → Users) | ✅ Yes       | Links comment to user. |
+| `bio`     | String          | ❌ No        | Comment text. |
+| `coverImage` | File (Appwrite Storage) | ❌ No | Featured image for profile banner. |
+| `profileImage` | File (Appwrite Storage) | ❌ No | Featured image for profile. |
 | `content` | String          | ✅ Yes       | Comment text. |
-| `createdAt` | Date (Auto)    | ✅ Yes       | Timestamp of comment. |
+| `createdAt` | Date (Auto)   | ✅ Yes      | Timestamp of comment. |
 
 ---
 

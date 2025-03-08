@@ -52,7 +52,7 @@ await account.create(
 const databases = new Databases(client);
 
 const user = await databases.getDocument(
-    'database-blogv1',
+    'blogv1',
     'users',
     '[USER_ID]'
 );
@@ -61,7 +61,7 @@ const user = await databases.getDocument(
 final databases = Databases(client);
 
 final user = await databases.getDocument(
-    databaseId: 'database-blogv1',
+    databaseId: 'blogv1',
     collectionId: 'users',
     documentId: '[USER_ID]'
 );
@@ -73,7 +73,7 @@ final user = await databases.getDocument(
 const databases = new Databases(client);
 
 await databases.createDocument(
-    'database-blogv1',
+    'blogv1',
     'posts',
     ID.unique(),
     {
@@ -91,7 +91,7 @@ await databases.createDocument(
 final databases = Databases(client);
 
 await databases.createDocument(
-    databaseId: 'database-blogv1',
+    databaseId: 'blogv1',
     collectionId: 'posts',
     documentId: ID.unique(),
     data: {
@@ -109,7 +109,7 @@ await databases.createDocument(
 ```javascript
 // Web
 const posts = await databases.listDocuments(
-    'database-blogv1',
+    'blogv1',
     'posts',
     [
         Query.equal('status', 'published')
@@ -118,7 +118,7 @@ const posts = await databases.listDocuments(
 
 // Flutter
 final posts = await databases.listDocuments(
-    databaseId: 'database-blogv1',
+    databaseId: 'blogv1',
     collectionId: 'posts',
     queries: [
         Query.equal('status', 'published')
@@ -130,7 +130,7 @@ final posts = await databases.listDocuments(
 ```javascript
 // Web
 await databases.createDocument(
-    'database-blogv1',
+    'blogv1',
     'comments',
     ID.unique(),
     {
@@ -142,7 +142,7 @@ await databases.createDocument(
 
 // Flutter
 await databases.createDocument(
-    databaseId: 'database-blogv1',
+    databaseId: 'blogv1',
     collectionId: 'comments',
     documentId: ID.unique(),
     data: {
@@ -156,7 +156,7 @@ await databases.createDocument(
 ```javascript
 // Web
 const comments = await databases.listDocuments(
-    'database-blogv1',
+    'blogv1',
     'comments',
     [
         Query.equal('postId', '[POST_ID]')
@@ -165,7 +165,7 @@ const comments = await databases.listDocuments(
 
 // Flutter
 final comments = await databases.listDocuments(
-    databaseId: 'database-blogv1',
+    databaseId: 'blogv1',
     collectionId: 'comments',
     queries: [
         Query.equal('postId', '[POST_ID]')

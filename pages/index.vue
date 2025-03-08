@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4">
+  <div class="p-4  max-w-4xl mx-auto md:mb-3 sm:mb-15 xs:mb-15">
     <!-- Login Dialog -->
     <LoginDialog />
 
@@ -8,7 +8,7 @@
 
     <!-- New Post Component -->
     <NewPost :disabled="!hasProfile" @request-profile="showProfileDialog = true" :currentUser="currentUser"
-      :Profile="Profile" />
+      :Profile="Profile" @post-created="handleNewPost" />
 
     <!-- Feed Section -->
     <div class="space-y-4">
@@ -36,8 +36,9 @@
 
       <div v-else v-for="post in filteredPosts" :key="post.id"
         class="bg-white p-4 rounded-lg  hover:shadow-md transition-shadow duration-200">
+
         <div class="flex items-center mb-2">
-          <div class="flex justify-between w-full">
+          <div @click="navigateToProfile(post.authorId)" class="flex justify-between w-full">
             <div class="flex items-center">
               <img :src="post.authorAvatar" alt="Author" class="w-10 h-10 rounded-full mr-2 " />
               <div class="flex flex-col">
@@ -46,19 +47,25 @@
               </div>
             </div>
             <div class="flex gap-1 items-center">
-              <span class="text-gray-500 text-sm xs:text-xs sm:text-xs ml-auto">{{ formatDate(post.createdAt) }}</span>
-              <span v-if="post.isHidden" class="text-gray-500 text-sm xs:text-xs sm:text-xs ml-auto bg-red-100 rounded-full px-2 py-1 gap-1 flex items-center"><i class="fas fa-lock text-sm"></i> {{ post.isHidden ? 'Hidden' : 'Visible' }}</span>
-              <span v-else class="text-gray-500 text-sm xs:text-xs sm:text-xs ml-auto bg-green-100 rounded-full px-2 py-1 gap-1 flex items-center"><i class="fas fa-globe text-sm"></i> {{ post.isHidden ? 'Hidden' : 'Visible' }}</span>
+              <span class="text-gray-500 text-sm xs:text-xs sm:text-xs ml-auto">{{ formatDate(post.createdAt)
+              }}</span>
+              <span v-if="post.isHidden"
+                class="text-gray-500 text-sm xs:text-xs sm:text-xs ml-auto bg-red-100 rounded-full px-2 py-1 gap-1 flex items-center"><i
+                  class="fas fa-lock text-sm"></i> {{ post.isHidden ? 'Hidden' : 'Visible' }}</span>
+              <span v-else
+                class="text-gray-500 text-sm xs:text-xs sm:text-xs ml-auto bg-green-100 rounded-full px-2 py-1 gap-1 flex items-center"><i
+                  class="fas fa-globe text-sm"></i> {{ post.isHidden ? 'Hidden' : 'Visible' }}</span>
             </div>
           </div>
         </div>
+        <div @click="navigateTo(`/post/${post.id}`)">
+          <h3 class="font-semibold text-lg mb-2">{{ post.title }}</h3>
 
-        <h3 class="font-semibold text-lg mb-2">{{ post.title }}</h3>
+          <img v-if="post.banner" :src="post.banner" alt="Post banner"
+            class="w-full h-48 object-cover mb-3 rounded-lg" />
 
-        <img v-if="post.banner" :src="post.banner" alt="Post banner" class="w-full h-48 object-cover mb-3 rounded-lg" />
-
-        <MDC :value="post.excerpt" tag="article" class="prose prose-sm max-w-none mb-3" />
-
+          <MDC :value="post.excerpt" tag="article" class="prose prose-sm max-w-none mb-3" />
+        </div>
         <div class="flex items-center mt-3 text-gray-500 border-t pt-3">
           <div class="flex items-center mr-4">
             <Icon name="solar:eye-bold" class="mr-1" />
@@ -93,6 +100,7 @@ import { ref, onMounted, computed, onUnmounted } from 'vue';
 import { account, databases, client } from '~/utils/appwrite';
 import { Query } from 'appwrite';
 import { DATABASE_ID, POSTS_COLLECTION_ID, USERS_COLLECTION_ID } from '~/utils/appwrite';
+import { useRouter } from 'vue-router';
 
 // Define middleware
 definePageMeta({
@@ -107,7 +115,7 @@ const hasProfile = ref(false);
 const Profile = useState('Profile', () => null);
 const showProfileDialog = ref(false);
 const userLikedPosts = ref(new Set());
-
+const router = useRouter();
 // Filtered posts (exclude deleted posts)
 const filteredPosts = computed(() => {
   return featuredPosts.value.filter(post => !post.isDeletedAt);
@@ -147,6 +155,11 @@ const formatDate = (dateString) => {
     month: 'short',
     day: 'numeric'
   });
+};
+
+const navigateToProfile = (userId) => {
+  console.log(userId);
+    router.push(`/user/${userId.$id}`);
 };
 
 // Increment view count for a post
@@ -291,6 +304,35 @@ const subscribeToRealtimeUpdates = () => {
   });
 };
 
+// Function to handle new post creation
+const handleNewPost = async (newPostData) => {
+  try {
+    // Format the new post to match the structure of posts in featuredPosts
+    const newPost = {
+      id: newPostData.$id,
+      authorId: newPostData.authorId,
+      authorName: Profile.value?.name || 'Anonymous',
+      authorUsername: Profile.value?.username || 'Anonymous',
+      authorAvatar: Profile.value?.profileImage || 'https://via.placeholder.com/150',
+      title: newPostData.title,
+      excerpt: newPostData.Markdown ? newPostData.Markdown.substring(0, 200) + '...' : '',
+      banner: newPostData.coverImage || null,
+      createdAt: newPostData.createdAt,
+      views: newPostData.views || 0,
+      likes: newPostData.likes || 0,
+      isHidden: newPostData.isHidden || false,
+      isDeletedAt: newPostData.isDeletedAt || null,
+      userLiked: false,
+      viewIncremented: false
+    };
+
+    // Add the new post to the beginning of the featuredPosts array
+    featuredPosts.value.unshift(newPost);
+  } catch (err) {
+    console.error('Error handling new post:', err);
+  }
+};
+
 // Fetch posts from Appwrite on component mount
 onMounted(async () => {
   try {
@@ -310,14 +352,33 @@ onMounted(async () => {
     const databaseId = DATABASE_ID;
     const collectionId = POSTS_COLLECTION_ID;
 
+    // Create query conditions
+    const queryConditions = [
+      Query.isNull("isDeletedAt"), // Only fetch non-deleted posts
+      Query.orderDesc('createdAt'), // Sort by creation date, newest first
+      Query.limit(10)              // Limit to 10 posts
+    ];
+
+    // Add condition to only show public posts OR the current user's hidden posts
+    if (currentUser.value) {
+      queryConditions.push(
+        Query.or([
+          Query.equal("isHidden", false),                      // Public posts
+          Query.and([
+            Query.equal("isHidden", true),                     // Hidden posts
+            Query.equal("authorId", currentUser.value.$id)     // That belong to current user
+          ])
+        ])
+      );
+    } else {
+      // If no user is logged in, only show public posts
+      queryConditions.push(Query.equal("isHidden", false));
+    }
+
     const response = await databases.listDocuments(
       databaseId,
       collectionId,
-      [
-        Query.isNull("isDeletedAt"), // Only fetch non-deleted posts
-        Query.orderDesc('createdAt'),     // Sort by creation date, newest first
-        Query.limit(10)                   // Limit to 10 posts
-      ]
+      queryConditions
     );
 
     featuredPosts.value = await Promise.all(response.documents.map(async doc => {

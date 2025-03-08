@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col min-h-screen relative overflow-hidden">
+  <div class="flex flex-col min-h-screen relative overflow-hidden ">
     <!-- Top Header for Mobile -->
     <div v-if="!isLoginOrSignupPage" class="flex items-center justify-between p-2 shadow md:hidden">
       <button 
@@ -41,7 +41,7 @@
         :class="`flex-1 min-h-screen transition-all hide-scrollbar duration-300 
           ${isLeftSidebarOpen && !showLoginDialog ? 'ml-0' : ''}`"
       >
-        <NuxtPage class="p-2 md:p-6 lg:p-8"/>
+        <NuxtPage class="p-2 md:p-6 lg:p-8 mb-10"/>
       </main>
 
       <!-- Right Sidebar - Fixed -->
