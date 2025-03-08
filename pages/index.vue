@@ -36,6 +36,7 @@
 
       <div v-else v-for="post in filteredPosts" :key="post.id"
         class="bg-white p-4 rounded-lg  hover:shadow-md transition-shadow duration-200">
+        <div @click="navigateTo(`/post/${post.id}`)">
         <div class="flex items-center mb-2">
           <div class="flex justify-between w-full">
             <div class="flex items-center">
@@ -58,7 +59,7 @@
         <img v-if="post.banner" :src="post.banner" alt="Post banner" class="w-full h-48 object-cover mb-3 rounded-lg" />
 
         <MDC :value="post.excerpt" tag="article" class="prose prose-sm max-w-none mb-3" />
-
+      </div>
         <div class="flex items-center mt-3 text-gray-500 border-t pt-3">
           <div class="flex items-center mr-4">
             <Icon name="solar:eye-bold" class="mr-1" />

@@ -1,3 +1,3 @@
-package com.tauri.dev
+package com.cscc.space
 
 class MainActivity : TauriActivity()

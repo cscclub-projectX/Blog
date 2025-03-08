@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "cscc-blog",
+  "productName": "CSCC Space",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "com.cscc.space",
   "build": {
     "frontendDist": "../.output/public",
     "devUrl": "http://localhost:3000",
@@ -12,9 +12,9 @@
   "app": {
     "windows": [
       {
-        "title": "CSCC Blog",
-        "width": 800,
-        "height": 600,
+        "title": "CSCC Space",
+        "width": 1280,
+        "height": 720,
         "resizable": true,
         "fullscreen": false
       }
