@@ -1,5 +1,5 @@
 # Base on Node.js LTS (Long Term Support)
-FROM node:22-alpine as build
+FROM --platform=linux/amd64 node:22-alpine as build
 
 # Set working directory
 WORKDIR /app
@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package.json ./
 
 # Install dependencies
-RUN npm i
+RUN npm i --no-optional --ignore-scripts && npm run docker:prepare
 
 # Copy the rest of the application
 COPY . .
