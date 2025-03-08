@@ -140,7 +140,7 @@ import { useEditor, EditorContent } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import { Markdown } from 'tiptap-markdown';
-import { client, account, ID } from '~/utils/appwrite';
+import { client, ID } from '~/utils/appwrite';
 import { Databases, Storage } from 'appwrite';
 import { DATABASE_ID, POSTS_COLLECTION_ID, STORAGE_BUCKET_ID } from '~/utils/appwrite';
 
@@ -149,33 +149,20 @@ const props = defineProps({
     disabled: {
         type: Boolean,
         default: false
-    },
-    // currentUser: {
-    //     type: Object,
-    //     default: null
-    // },
-    // Profile: {
-    //     type:   Object,
-    //     default: null
-    // }
+    }
 });
 
 // Define emits
-const emit = defineEmits(['request-profile',
-    //  'currentUser', 'Profile'
-]);
+const emit = defineEmits(['request-profile']);
 
 // Initialize Appwrite services
 const databases = new Databases(client);
-const currentUser = useState('currentUser', () => null)
-console.log('currentUser')
-console.log(currentUser.value)
-const Profile = useState('Profile', () => null)
-console.log('Profile')
-console.log(Profile.value)
 const storage = new Storage(client);
-const user = await account.get();
-const userAvatar = user.avatar;
+
+// Use the shared state instead of direct API calls
+const currentUser = useState('currentUser', () => null);
+const Profile = useState('Profile', () => null);
+
 const postTitle = ref('');
 const postContent = ref('');
 const isVisibilityOpen = ref(false);

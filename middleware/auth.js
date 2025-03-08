@@ -1,7 +1,10 @@
 export default defineNuxtRouteMiddleware(async (to, from) => {
     try {
+        console.log('Middleware auth check')
         const isAuthenticated = useState('isAuthenticated', () => false)
-        const { account } = await import('~/utils/appwrite')
+        const { account, databases, DATABASE_ID, USERS_COLLECTION_ID } = await import('~/utils/appwrite')
+        const { Query } = await import('appwrite')
+        
         // This will throw an error if no valid session exists
         const session = await account.getSession('current')
         console.log(session)
@@ -17,9 +20,11 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
                 const response = await databases.listDocuments(
                   DATABASE_ID,
                   USERS_COLLECTION_ID,
-                  [Query.equal('$id',  user.$id )]
+                  [Query.equal('$id', user.$id)]
                 );
-                useState('Profile', () => response.documents[0])
+                if (response.documents.length > 0) {
+                    useState('Profile', () => response.documents[0])
+                }
             } catch (userError) {
                 console.warn('Could not get user details, but session is valid')
             }

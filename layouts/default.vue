@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col min-h-screen relative overflow-hidden">
     <!-- Top Header for Mobile -->
-    <div class="flex items-center justify-between p-2 shadow md:hidden">
+    <div v-if="!isLoginOrSignupPage" class="flex items-center justify-between p-2 shadow md:hidden">
       <button 
         @click="toggleLeftSidebar" 
         class="p-2 rounded-md"
@@ -12,8 +12,8 @@
       </button>
 
       <div class="flex -space-x-5 items-center">
-        <NuxtImg src="/images/cscc_usdb_logo.jpg" alt="Logo" class="w-12 h-12 rounded-2xl bg-gradient-to-r border-2 border-white from-purple-200 to-blue-200" />
-        <NuxtImg src="/images/image.webp" alt="Profile Picture" class="w-12 h-12 rounded-full border-2 border-white" />
+        <NuxtImg src="/images/cscc.jpg" alt="Logo" class="w-12 h-12 rounded-2xl bg-gradient-to-r border-2 border-white from-purple-200 to-blue-200" />
+        <NuxtImg :src="profile?.profileImage" alt="Profile Picture" class="w-12 h-12 rounded-full border-2 border-white" />
       </div>
 
       <button 
@@ -58,7 +58,7 @@
 
 <script setup>
 import { useRoute } from 'vue-router';
-
+let profile = useState('Profile', () => null)
 const route = useRoute();
 const isLoginOrSignupPage = computed(() => {
   return route.name === 'auth-login' || route.name === 'auth-signup'; // Adjust these names based on your actual route names
@@ -88,6 +88,7 @@ onMounted(() => {
       isLeftSidebarOpen.value = false
       isRightSidebarOpen.value = false
     }
+
   }
 
   handleResize()
