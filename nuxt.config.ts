@@ -13,7 +13,7 @@ export default defineNuxtConfig({
     '~/assets/css/main.css',"@milkdown/theme-nord/style.css",
   ],
 
-
+  devServer: { host: process.env.TAURI_DEV_HOST || 'localhost' },
  modules: ['@nuxt/image', '@nuxt/fonts', '@nuxt/icon', '@nuxt/content', '@nuxtjs/mdc'],
   app: {
     head: {
@@ -36,4 +36,9 @@ export default defineNuxtConfig({
   ssr: false,
   // Alternatively, you can disable SSR globally if your entire app relies on client-side auth
   // ssr: false,
+  // nitro: {
+  //   prerender: {
+  //     enabled: false
+  //   }
+  // }
 })

@@ -193,7 +193,7 @@ const login = async () => {
     errorMessage.value = ''
     
     // Login with Appwrite
-    const session = await account.createEmailSession(email.value, password.value)
+    const session = await account.createEmailPasswordSession(email.value, password.value)
     
     // Get user account info
     const user = await account.get()
