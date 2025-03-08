@@ -153,7 +153,7 @@ const props = defineProps({
 });
 
 // Define emits
-const emit = defineEmits(['request-profile']);
+const emit = defineEmits(['request-profile', 'post-created']);
 
 // Initialize Appwrite services
 const databases = new Databases(client);
@@ -253,8 +253,6 @@ const setVisibility = (option) => {
 const submitPost = async () => {
     if (postTitle.value.trim() && postContent.value.trim()) {
         try {
-
-
             // Get markdown content
             let markdown = '';
             if (editor.value) {
@@ -299,7 +297,6 @@ const submitPost = async () => {
                 };
             }
 
-
             // Create post in Appwrite
             const response = await databases.createDocument(
                 DATABASE_ID,
@@ -310,6 +307,9 @@ const submitPost = async () => {
 
             console.log('Post created successfully:', response);
 
+            // Emit event with the new post data
+            emit('post-created', response);
+
             // Clear form after successful submission
             postTitle.value = '';
             if (editor.value) {
@@ -319,6 +319,8 @@ const submitPost = async () => {
             markdownContent.value = '';
             showEditor.value = false;
             showMarkdown.value = false;
+            coverImagePreview.value = null;
+            coverImageFile.value = null;
 
             // You could add a success notification here
 

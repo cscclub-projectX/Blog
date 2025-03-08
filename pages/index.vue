@@ -8,7 +8,7 @@
 
     <!-- New Post Component -->
     <NewPost :disabled="!hasProfile" @request-profile="showProfileDialog = true" :currentUser="currentUser"
-      :Profile="Profile" />
+      :Profile="Profile" @post-created="handleNewPost" />
 
     <!-- Feed Section -->
     <div class="space-y-4">
@@ -290,6 +290,35 @@ const subscribeToRealtimeUpdates = () => {
       }
     }
   });
+};
+
+// Function to handle new post creation
+const handleNewPost = async (newPostData) => {
+  try {
+    // Format the new post to match the structure of posts in featuredPosts
+    const newPost = {
+      id: newPostData.$id,
+      authorId: newPostData.authorId,
+      authorName: Profile.value?.name || 'Anonymous',
+      authorUsername: Profile.value?.username || 'Anonymous',
+      authorAvatar: Profile.value?.profileImage || 'https://via.placeholder.com/150',
+      title: newPostData.title,
+      excerpt: newPostData.Markdown ? newPostData.Markdown.substring(0, 200) + '...' : '',
+      banner: newPostData.coverImage || null,
+      createdAt: newPostData.createdAt,
+      views: newPostData.views || 0,
+      likes: newPostData.likes || 0,
+      isHidden: newPostData.isHidden || false,
+      isDeletedAt: newPostData.isDeletedAt || null,
+      userLiked: false,
+      viewIncremented: false
+    };
+
+    // Add the new post to the beginning of the featuredPosts array
+    featuredPosts.value.unshift(newPost);
+  } catch (err) {
+    console.error('Error handling new post:', err);
+  }
 };
 
 // Fetch posts from Appwrite on component mount
