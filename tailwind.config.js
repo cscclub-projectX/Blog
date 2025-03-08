@@ -1,4 +1,5 @@
-export default {
+module.exports = {
+  content: [],
   theme: {
     extend: {
       width: {
@@ -11,5 +12,8 @@ export default {
         '1/6': '16.666667%',
       }
     }
-  }
+  },
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 } 

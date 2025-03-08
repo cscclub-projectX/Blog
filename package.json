@@ -8,17 +8,42 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "start": "nuxt start"
+    "start": "nuxt start",
+    "tauri": "npx tauri"
   },
   "dependencies": {
     "@heroicons/vue": "^2.2.0",
+    "@milkdown/crepe": "^7.6.3",
+    "@milkdown/kit": "^7.6.3",
+    "@milkdown/theme-nord": "^7.6.3",
+    "@milkdown/vue": "^7.6.3",
+    "@nuxt/content": "^3.2.1",
     "@nuxt/fonts": "^0.10.3",
     "@nuxt/icon": "^1.10.3",
     "@nuxt/image": "^1.9.0",
+    "@nuxtjs/mdc": "^0.15.0",
     "@tailwindcss/vite": "^4.0.8",
+    "@tiptap/extension-image": "^2.11.5",
+    "@tiptap/pm": "^2.11.5",
+    "@tiptap/starter-kit": "^2.11.5",
+    "@tiptap/vue-3": "^2.11.5",
+    "@ts-stack/markdown": "^1.5.0",
+    "appwrite": "^14.0.1",
     "nuxt": "^3.15.4",
+    "start": "^5.1.0",
     "tailwindcss": "^4.0.8",
+    "tiptap-markdown": "^0.8.10",
+    "turndown": "^7.2.0",
     "vue": "latest",
     "vue-router": "latest"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.3.1",
+    "css-loader": "^7.1.2",
+    "html-webpack-plugin": "^5.6.3",
+    "mini-css-extract-plugin": "^2.9.2",
+    "sass-embedded": "^1.85.0",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1"
   }
 }

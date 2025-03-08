@@ -11,12 +11,12 @@
     <!-- Profile Section -->
     <div class="flex flex-col items-center mb-6">
       <div class="flex -space-x-5">
-        <NuxtImg src="/images/cscc_usdb_logo.jpg" alt="Logo" class="w-12 h-12 rounded-2xl bg-gradient-to-r border-2 border-white from-purple-200 to-blue-200" />
-        <NuxtImg src="/images/image.webp" alt="Profile Picture" class="w-12 h-12 rounded-full border-2 border-white" />
+        <NuxtImg src="/images/cscc.jpg" alt="Logo" class="w-12 h-12 rounded-2xl bg-gradient-to-r border-2 border-white from-purple-200 to-blue-200" />
+        <NuxtImg :src="Profile?.profileImage" alt="Profile Picture" class="w-12 h-12 rounded-full border-2 border-white" />
       </div>
       <div class="text-center mt-2">
-        <h3 class="font-semibold text-gray-800">Bogdan Nikitin</h3>
-        <p class="text-sm text-gray-500">@nikitinteam</p>
+        <h3 class="font-semibold text-gray-800">{{ Profile?.name }}</h3>
+        <p class="text-sm text-gray-500">@{{ Profile?.username }}</p>
       </div>
     </div>
 
@@ -33,6 +33,7 @@
       <NuxtLink 
         to="/authors" 
         class="flex items-center p-3 text-gray-800 rounded-xl hover:bg-blue-100 transition-all duration-200"
+        :class="{ 'bg-blue-100': $route.path === '/authors' }"
       >
         <span class="flex justify-between w-full">
           👋 Authors
@@ -43,6 +44,7 @@
       <NuxtLink 
         to="/settings" 
         class="flex items-center p-3 text-gray-800 rounded-xl hover:bg-blue-100 transition-all duration-200"
+        :class="{ 'bg-blue-100': $route.path === '/settings' }"
       >
         ⚙️ Settings
       </NuxtLink>
@@ -56,25 +58,23 @@
           <p class="text-sm text-gray-600 mt-1">Get our mobile app</p>
         </div>
         <div class="flex -space-x-2">
-          <NuxtImg src="/images/avatar1.jpg" alt="User" class="w-8 h-8 rounded-full border-2 border-white" />
-          <NuxtImg src="/images/avatar2.jpg" alt="User" class="w-8 h-8 rounded-full border-2 border-white" />
-          <NuxtImg src="/images/avatar3.jpg" alt="User" class="w-8 h-8 rounded-full border-2 border-white" />
+          <NuxtImg src="/images/cat-1.jpg" alt="User" class="w-8 h-8 rounded-full border-2 border-white" />
+          <NuxtImg src="/images/cat-2.jpg" alt="User" class="w-8 h-8 rounded-full border-2 border-white" />
+          <NuxtImg src="/images/cat-3.jpg" alt="User" class="w-8 h-8 rounded-full border-2 border-white" />
         </div>
       </div>
     </div>
   </nav>
 </template>
 
-<script>
-export default {
-  name: 'Sidebar',
-  props: {
-    closeSidebar: {
-      type: Function,
-      required: true
-    }
-  }
-}
+<script setup>
+const { closeSidebar } = defineProps(['closeSidebar'])
+const currentUser = useState('currentUser', () => null)
+const Profile = useState('Profile', () => ({
+  name: 'Guest',
+  username: 'guest',
+  profileImage: 'https://via.placeholder.com/150'
+}))
 </script>
 
 <style scoped>

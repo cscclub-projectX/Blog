@@ -128,3 +128,14 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+.data
+.data/content/contents.sqlite
+.data/content/contents.sqlite-journal
+.data/content/contents.sqlite-lock
+.data/content/contents.sqlite-trace
+.data/content/contents.sqlite-wal
+.data/content/contents.sqlite-shm
+.data/content/contents.sqlite-mdb
+.data/content/contents.sqlite-mdb-journal
+
+.data/content/contents.sqlite
