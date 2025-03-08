@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4">
+  <div class="p-4 bg-gray-100">
     <!-- Login Dialog -->
     <LoginDialog />
 
@@ -311,14 +311,33 @@ onMounted(async () => {
     const databaseId = DATABASE_ID;
     const collectionId = POSTS_COLLECTION_ID;
 
+    // Create query conditions
+    const queryConditions = [
+      Query.isNull("isDeletedAt"), // Only fetch non-deleted posts
+      Query.orderDesc('createdAt'), // Sort by creation date, newest first
+      Query.limit(10)              // Limit to 10 posts
+    ];
+
+    // Add condition to only show public posts OR the current user's hidden posts
+    if (currentUser.value) {
+      queryConditions.push(
+        Query.or([
+          Query.equal("isHidden", false),                      // Public posts
+          Query.and([
+            Query.equal("isHidden", true),                     // Hidden posts
+            Query.equal("authorId", currentUser.value.$id)     // That belong to current user
+          ])
+        ])
+      );
+    } else {
+      // If no user is logged in, only show public posts
+      queryConditions.push(Query.equal("isHidden", false));
+    }
+
     const response = await databases.listDocuments(
       databaseId,
       collectionId,
-      [
-        Query.isNull("isDeletedAt"), // Only fetch non-deleted posts
-        Query.orderDesc('createdAt'),     // Sort by creation date, newest first
-        Query.limit(10)                   // Limit to 10 posts
-      ]
+      queryConditions
     );
 
     featuredPosts.value = await Promise.all(response.documents.map(async doc => {

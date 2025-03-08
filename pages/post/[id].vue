@@ -21,7 +21,7 @@
         <!-- Post content -->
         <div v-else>
             <!-- Author info and metadata - Medium style top bar -->
-            <div class="bg-white rounded-lg shadow-sm p-4 mb-6 sticky top-0 z-50 w-11/12 mx-auto rounded-xl border border-gray-200">
+            <div class="bg-white rounded-lg shadow-sm p-4 mb-6 sticky top-0  w-11/12 mx-auto rounded-xl border border-gray-200">
                 <div class="flex items-center justify-between ">
                     <div class="flex items-center">
                         <NuxtLink :to="`/users/${post.authorId}`" class="flex items-center">
@@ -70,7 +70,7 @@
                 </h1>
                 
                 <!-- Post cover image - full width like Medium -->
-                <img v-if="post.banner" :src="post.banner" alt="Post banner" class="w-full max-h-[500px] object-cover" />
+                <img v-if="post.banner" :src="post.banner" alt="Post banner" class="w-full max-h-[500px] object-cover rounded-2xl" />
                 
                 <!-- Post content - with improved typography -->
                 <div class="p-6 md:p-8">
