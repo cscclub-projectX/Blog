@@ -21,7 +21,7 @@
         <!-- Post content -->
         <div v-else>
             <!-- Author info and metadata - Medium style top bar -->
-            <div class="bg-white rounded-lg shadow-sm p-4 mb-6 sticky top-0  w-11/12 mx-auto rounded-xl border border-gray-200">
+            <div class="bg-white rounded-lg shadow-sm p-4 mb-6  w-11/12 mx-auto rounded-xl border border-gray-200">
                 <div class="flex items-center justify-between ">
                     <div class="flex items-center">
                         <NuxtLink :to="`/user/${post.authorId.$id}`" class="flex items-center">

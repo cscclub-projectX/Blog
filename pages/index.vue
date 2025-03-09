@@ -37,7 +37,7 @@
       <!-- Posts List -->
       <div v-else class="space-y-4">
         <div v-for="post in filteredPosts" :key="post.id"
-          class="bg-white p-4 rounded-xl  hover:shadow-md transition-shadow duration-200">
+          class="bg-gray-100 p-4 rounded-xl  hover:shadow-md transition-shadow duration-200">
           
           <!-- Post Header -->
           <div class="flex items-center justify-between mb-3">

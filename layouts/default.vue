@@ -5,21 +5,31 @@
       <button 
         @click="toggleLeftSidebar" 
         class="p-2 rounded-md"
-        v-if="!showLoginDialog"
+        v-if="!showLoginDialog && profile"
       >
         <span class="sr-only">Toggle Left Sidebar</span>
         {{ isLeftSidebarOpen ? '❌' : '☰' }}
       </button>
-
+      
+      <!-- Logo always visible -->
       <div class="flex -space-x-5 items-center">
         <NuxtImg src="/images/cscc.jpg" alt="Logo" class="w-12 h-12 rounded-2xl bg-gradient-to-r border-2 border-white from-purple-200 to-blue-200" />
-        <NuxtImg :src="profile?.profileImage" alt="Profile Picture" class="w-12 h-12 rounded-full border-2 border-white" />
+        <div v-if="profile">
+          
+          <NuxtImg :src="profile.profileImage" alt="Profile Picture" class="w-12 h-12 rounded-full border-2 border-white" />
+        </div>
       </div>
+
+      <!-- Show profile picture if logged in, otherwise show login button -->
+      
+      <NuxtLink v-if="!profile" to="/auth/login" class="px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium">
+        Login
+      </NuxtLink>
 
       <button 
         @click="toggleRightSidebar" 
         class="p-2 rounded-md"
-        v-if="!showLoginDialog"
+        v-if="!showLoginDialog && profile"
       >
         <span class="sr-only">Toggle Right Sidebar</span>
         {{ isRightSidebarOpen ? '❌' : '⋮' }}
