@@ -64,17 +64,36 @@
             
             <!-- Main content area -->
             <div class="bg-white rounded-lg overflow-hidden mb-6">
-                <!-- Post title - Medium style large title -->
-                <h1 class="text-3xl md:text-4xl font-bold px-6 pt-6 pb-4 text-gray-900 leading-tight">
-                    {{ post.title }}
-                </h1>
+                <!-- Post title section with type badge -->
+                <div class="px-6 pt-6 pb-4">
+                    <!-- Post Type Badge -->
+                    <span 
+                        :class="[
+                            'text-xs px-2 py-1 rounded-full font-medium mb-3 inline-block',
+                            post.type === 'article' 
+                                ? 'bg-purple-100 text-purple-800' 
+                                : 'bg-blue-100 text-blue-800'
+                        ]"
+                    >
+                        {{ post.type || 'Post' }}
+                    </span>
+                    
+                    <!-- Post title -->
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+                        {{ post.title }}
+                    </h1>
+                </div>
                 
                 <!-- Post cover image - full width like Medium -->
                 <img v-if="post.banner" :src="post.banner" alt="Post banner" class="w-full max-h-[500px] object-cover rounded-2xl" />
                 
                 <!-- Post content - with improved typography -->
                 <div class="p-6 md:p-8">
-                    <MDC :value="post.content" class="prose prose-lg md:prose-xl max-w-none prose-headings:font-semibold prose-a:text-blue-600" />
+                    <MDC 
+                        :value="processedContent" 
+                        tag="article" 
+                        class="prose prose-lg md:prose-xl max-w-none prose-headings:font-semibold prose-a:text-blue-600" 
+                    />
                 </div>
                 
                 <!-- Post stats and actions - Medium style bottom bar -->
@@ -105,14 +124,14 @@
             
             <!-- Author bio section - Medium style -->
             <div class="bg-white rounded-lg  p-6 mb-6">
-                <div class="flex items-start">
-                    <NuxtLink :to="`/users/${post.authorId}`">
+                <div class="flex items-start sm:flex-row flex-col">
+                    <NuxtLink :to="`/user/${post.authorId.$id}`">
                         <img :src="post.authorAvatar" alt="Author" class="w-14 h-14 rounded-full mr-4 border border-gray-200" />
                     </NuxtLink>
                     <div>
                         <h3 class="font-bold text-lg mb-1">Written by {{ post.authorName }}</h3>
                         <p class="text-gray-600 mb-3">Author bio would go here. This is a placeholder for the author's biography.</p>
-                        <NuxtLink :to="`/users/${post.authorId}`" class="text-green-600 font-medium hover:text-green-700">
+                        <NuxtLink :to="`/user/${post.authorId.$id}`" class="text-green-600 font-medium hover:text-green-700">
                             More from {{ post.authorName }}
                         </NuxtLink>
                     </div>
@@ -321,9 +340,9 @@ const toggleRepost = () => {
     isReposted.value = !isReposted.value
 }
 
-// Add this computed property
-const markdownContent = computed(() => {
-    return md.render(content)
+// Process markdown content
+const processedContent = computed(() => {
+  return post.value?.content || ''
 })
 
 // Define middleware
@@ -521,10 +540,11 @@ const fetchPost = async (postId) => {
             views: postDoc.views || 0,
             likes: postDoc.likes || 0,
             isHidden: postDoc.isHidden || false,
+            type: postDoc.type || 'post',
             userLiked: userLiked,
             viewIncremented: false
         }
-        console.log(post.value)
+        
         // Increment view count
         await incrementViews(postId)
         
@@ -571,6 +591,64 @@ onUnmounted(() => {
   font-family: 'Helvetica Neue', Arial, sans-serif;
   margin-top: 2em;
   margin-bottom: 0.8em;
+  font-weight: 700;
+}
+
+:deep(.prose h1) {
+  font-size: 2em;
+}
+
+:deep(.prose h2) {
+  font-size: 1.5em;
+}
+
+:deep(.prose h3) {
+  font-size: 1.25em;
+}
+
+:deep(.prose strong) {
+  font-weight: 700;
+}
+
+:deep(.prose em) {
+  font-style: italic;
+}
+
+:deep(.prose ul) {
+  list-style-type: disc;
+  padding-left: 1.5em;
+  margin: 1em 0;
+}
+
+:deep(.prose ol) {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+  margin: 1em 0;
+}
+
+:deep(.prose blockquote) {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1em;
+  margin: 1em 0;
+  font-style: italic;
+  color: #4b5563;
+}
+
+:deep(.prose code) {
+  font-family: monospace;
+  background-color: #f3f4f6;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25em;
+  font-size: 0.9em;
+}
+
+:deep(.prose pre) {
+  background-color: #1f2937;
+  color: #e5e7eb;
+  padding: 1em;
+  border-radius: 0.5em;
+  overflow-x: auto;
+  margin: 1em 0;
 }
 
 :deep(.prose p) {
@@ -579,7 +657,11 @@ onUnmounted(() => {
 
 :deep(.prose img) {
   border-radius: 4px;
+  max-width: 100%;
+  height: auto;
 }
+
+
 
 /* Hide scrollbar but allow scrolling */
 .hide-scrollbar {
