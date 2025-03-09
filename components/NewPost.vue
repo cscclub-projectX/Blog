@@ -17,6 +17,14 @@
             <NuxtImg :src="Profile?.profileImage" alt="User Avatar" class="w-10 h-10 rounded-full m-2" />
             <input v-model="postTitle" type="text" placeholder="Title of your post..."
                 class="flex-1 p-2 bg-white border-none  focus:outline-none rounded-2xl" />
+            
+            <!-- Post Type Selector -->
+            <div class="flex items-center mr-2">
+                <select v-model="postType" class="bg-gray-100 text-gray-800 px-3 py-1 rounded-lg border-none focus:ring-2 focus:ring-blue-300">
+                    <option value="post">Post</option>
+                    <option value="article">Article</option>
+                </select>
+            </div>
             <!-- <button @click="toggleVisibility" class="p-2 text-gray-600 hover:text-gray-800">
                 <i class="fas fa-share-alt text-xl"></i>
             </button> -->
@@ -196,6 +204,7 @@ const Profile = useState('Profile', () => null);
 
 const postTitle = ref('');
 const postContent = ref('');
+const postType = ref('post'); // Default post type
 const isVisibilityOpen = ref(false);
 const visibility = ref('public'); // Default visibility
 const showEditor = ref(false);
@@ -315,6 +324,7 @@ const submitPost = async () => {
                     views: 0,
                     likes: 0,
                     createdAt: new Date(),
+                    type: postType.value, // Add the post type
                     coverImage: `https://appwrite-os08sgw04g4swk0s8owwoooc.beamzy.net/v1/storage/buckets/67c9dbab003009fc0a92/files/${coverImageId}/view?project=project-x&project=project-x`,
                 };
             } else {
@@ -327,6 +337,7 @@ const submitPost = async () => {
                     views: 0,
                     likes: 0,
                     createdAt: new Date(),
+                    type: postType.value, // Add the post type
                 };
             }
 
@@ -356,6 +367,7 @@ const submitPost = async () => {
             coverImageFile.value = null;
             tags.value = [];
             tagInput.value = '';
+            postType.value = 'post'; // Reset post type to default
 
             // You could add a success notification here
 

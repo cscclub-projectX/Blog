@@ -24,7 +24,7 @@
             <div class="bg-white rounded-lg shadow-sm p-4 mb-6 sticky top-0  w-11/12 mx-auto rounded-xl border border-gray-200">
                 <div class="flex items-center justify-between ">
                     <div class="flex items-center">
-                        <NuxtLink :to="`/users/${post.authorId}`" class="flex items-center">
+                        <NuxtLink :to="`/user/${post.authorId.$id}`" class="flex items-center">
                            
                             <img :src="post.authorAvatar" alt="Author" class="w-12 h-12 rounded-full mr-3 border border-gray-200" />
                             <div class="flex flex-col">
@@ -74,7 +74,7 @@
                 
                 <!-- Post content - with improved typography -->
                 <div class="p-6 md:p-8">
-                    <MDC :value="post.content" tag="article" class="prose prose-lg md:prose-xl max-w-none prose-headings:font-semibold prose-a:text-blue-600" />
+                    <MDC :value="post.content" class="prose prose-lg md:prose-xl max-w-none prose-headings:font-semibold prose-a:text-blue-600" />
                 </div>
                 
                 <!-- Post stats and actions - Medium style bottom bar -->
@@ -125,8 +125,11 @@
 </template>
 
 <script setup>
+// Define middleware
+definePageMeta({
+  middleware: ['auth']
+});
 import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
-import MarkdownIt from 'markdown-it'
 import { useRoute } from 'vue-router'
 import { databases, client, DATABASE_ID, POSTS_COLLECTION_ID } from '~/utils/appwrite'
 
@@ -521,7 +524,7 @@ const fetchPost = async (postId) => {
             userLiked: userLiked,
             viewIncremented: false
         }
-        
+        console.log(post.value)
         // Increment view count
         await incrementViews(postId)
         

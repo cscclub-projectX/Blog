@@ -1,163 +1,179 @@
 <template>
-  <div class="max-w-4xl mx-auto">
-    <!-- Loading state -->
-    <div v-if="loading" class="flex justify-center items-center h-64">
-      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+  <div class="max-w-4xl mx-auto bg-white">
+    <!-- Cover Image -->
+    <div class="h-56 bg-gray-100 relative rounded-2xl">
+      <img 
+        :src="user?.coverImage || '/images/default-cover.jpg'" 
+        class="w-full h-full object-cover rounded-2xl"
+        alt="Cover image"
+      >
     </div>
 
-    <div v-else>
-      <!-- Cover Image -->
-      <div class="h-48 bg-gray-200 relative  rounded-2xl">
+    <div class="px-6">
+      <!-- Profile Header -->
+      <div class="relative">
         <img 
-          :src="user?.coverImage" 
-          class="w-full h-full object-cover  rounded-2xl"
-          alt="Cover image"
+          :src="user?.profileImage" 
+          :alt="user?.name"
+          class="absolute -top-20 w-36 h-36 rounded-full border-4 border-white object-cover shadow-md "
         >
       </div>
 
-      <div class="px-4">
-        <!-- Profile Header -->
-        <div class="relative">
-          <img 
-            :src="user?.profileImage" 
-            :alt="user?.name"
-            class="absolute -top-16 w-32 h-32 rounded-full border-4 border-white object-cover"
-          >
+      <div class="pt-20 pb-4 flex justify-between items-start">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">{{ user?.name }}</h1>
+          <p class="text-gray-600 font-medium">@{{ user?.username }}</p>
         </div>
+        
+        <button 
+          v-if="isCurrentUser"
+          @click="editProfile"
+          class="px-5 py-2 border border-gray-300 font-medium rounded-full hover:bg-gray-50 transition-colors duration-200"
+        >
+          Edit profile
+        </button>
+        <!-- <button 
+          v-else
+          @click="toggleFollow"
+          :class="[
+            'px-5 py-2 rounded-full font-medium transition-colors duration-200',
+            isFollowing 
+              ? 'border border-gray-300 hover:border-gray-400 hover:bg-gray-50' 
+              : 'bg-blue-500 text-white hover:bg-blue-600'
+          ]"
+        >
+          {{ isFollowing ? 'Following' : 'Follow' }}
+        </button> -->
+      </div>
 
-        <div class="pt-20 pb-2 flex justify-between items-start">
-          <div>
-            <h1 class="text-xl font-bold">{{ user?.name }}</h1>
-            <p class="text-gray-600">@{{ user?.username }}</p>
-          </div>
-          
-          <!-- Edit/Follow Button -->
+      <!-- Bio -->
+      <p class="text-gray-800 mb-4 max-w-lg">{{ user?.bio }}</p>
+
+      <!-- User Stats -->
+      <!-- <div class="flex space-x-6 text-gray-600 mb-6">
+        <div class="flex items-center">
+          <span class="font-bold text-gray-900 hover:underline cursor-pointer">{{ user?.following || 0 }}</span>
+          <span class="ml-1">Following</span>
+        </div>
+        <div class="flex items-center">
+          <span class="font-bold text-gray-900 hover:underline cursor-pointer">{{ user?.followers || 0 }}</span>
+          <span class="ml-1">Followers</span>
+        </div>
+      </div> -->
+    </div>
+
+    <!-- Posts Section -->
+    <div class="border-t border-gray-100 mt-2">
+      <div class="border-b border-gray-100 flex items-center justify-between px-6 py-4">
+        <h2 class="font-semibold text-gray-900 text-lg">
+          Content
+        </h2>
+        <div class="flex gap-4">
           <button 
-            v-if="isCurrentUser"
-            @click="editProfile"
-            class="px-4 py-2 border border-gray-300 font-semibold rounded-full hover:bg-gray-100 cursor-pointer transition-colors"
-          >
-            Edit profile
-          </button>
-          <button 
-            v-else
-            @click="toggleFollow"
+            @click="toggleView('list')"
             :class="[
-              'px-4 py-2 rounded-full font-semibold cursor-pointer transition-colors',
-              isFollowing 
-                ? 'border border-gray-300 hover:border-red-300 hover:text-red-600 hover:bg-red-50' 
-                : 'bg-black text-white hover:bg-gray-800'
+              'text-gray-500 hover:text-gray-900 transition-colors duration-200',
+              { 'text-blue-500': !isGridView }
             ]"
           >
-            {{ isFollowing ? 'Following' : 'Follow' }}
+            <Icon name="solar:list-bold" class="text-xl" />
           </button>
-        </div>
-
-        <!-- Bio -->
-        <p class="text-gray-500 mb-1 max-w-lg mt-2">About</p>
-        <p class="text-gray-800 mb-1 max-w-lg mb-4">{{ user?.bio || 'No bio available' }}</p>
-
-        <!-- User Stats -->
-        <div class="flex space-x-3 text-gray-600 mb-4">
-          <div class="flex items-center">
-            <span class="font-bold text-black hover:underline cursor-pointer">{{ user?.following || 0 }}</span>
-            <span class="ml-1">Following</span>
-          </div>
-          <span class="text-gray-800">•</span>
-          <div class="flex items-center">
-            <span class="font-bold text-black hover:underline cursor-pointer">{{ user?.followers || 0 }}</span>
-            <span class="ml-1">Followers</span>
-          </div>
+          <button 
+            @click="toggleView('grid')"
+            :class="[
+              'text-gray-500 hover:text-gray-900 transition-colors duration-200',
+              { 'text-blue-500': isGridView }
+            ]"
+          >
+            <Icon name="solar:gallery-wide-bold" class="text-xl" />
+          </button>
         </div>
       </div>
 
-      <!-- Posts Section -->
-      <div class="border-t mt-4">
-        <div class="border-b flex items-center justify-between px-4 py-3">
-          <h1 class="font-semibold text-gray-900 w-1/3">
-            Published Articles
-          </h1>
-          <div class="flex gap-3">
-            <button 
-              @click="toggleView('list')"
-              :class="[
-                'text-gray-500 hover:text-gray-900 cursor-pointer',
-                { 'text-gray-900': !isGridView }
-              ]"
-            >
-              <Icon name="solar:list-bold" class="text-lg" />
-            </button>
-            <button 
-              @click="toggleView('grid')"
-              :class="[
-                'text-gray-500 hover:text-gray-900 cursor-pointer',
-                { 'text-gray-900': isGridView }
-              ]"
-            >
-              <Icon name="solar:squares-bold" class="text-lg" />
-            </button>
-          </div>
-        </div>
-
-        <!-- Posts List -->
-        <div v-if="loadingPosts" class="py-8 flex justify-center">
-          <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-        
-        <div v-else-if="posts.length === 0" class="py-8 text-center text-gray-600">
-          <Icon name="solar:document-text-bold" class="text-4xl text-gray-400 mb-2" />
-          <p>No posts yet</p>
-        </div>
-        
-        <div :class="[
-          isGridView ? 'grid grid-cols-1 md:grid-cols-2 gap-6 px-4 py-6 w-full' : 'divide-y'
+      <!-- Posts List -->
+      <div v-if="loading" class="py-8 text-center">
+        <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mx-auto mb-2"></div>
+        <p class="text-gray-600">Loading content...</p>
+      </div>
+      
+      <div v-else-if="posts.length === 0" class="py-16 text-center text-gray-600">
+        <Icon name="solar:document-text-bold" class="text-4xl text-gray-400 mb-2 mx-auto" />
+        <p>No content published yet</p>
+      </div>
+      
+      <div :class="[
+        isGridView ? 'grid grid-cols-1 md:grid-cols-2 gap-6 px-6 py-6' : 'divide-y divide-gray-100'
+      ]">
+        <div v-for="post in posts" :key="post.id" :class="[
+          isGridView 
+            ? 'bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden' 
+            : 'px-6 py-5 hover:bg-gray-50 transition-colors duration-200'
         ]">
-          <div v-for="post in posts" :key="post.id" :class="[
-            isGridView ? 'bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-5 flex flex-col' : 'p-6 hover:bg-gray-50 transition-colors'
-          ]">
-            <!-- Post Header - Outside clickable area -->
-            <div class="flex items-center space-x-2 mb-3">
+          <!-- Post Header - Outside clickable area -->
+          <div class="flex items-center justify-between mb-3" :class="{ 'px-4 pt-4': isGridView }">
+            <div class="flex items-center space-x-2">
               <img :src="user?.profileImage" class="w-8 h-8 rounded-full" :alt="user?.name">
               <div class="flex flex-col">
                 <span class="font-medium text-sm">{{ user?.name }}</span>
-                <div class="text-gray-500 text-xs">
-                  <span>{{ formatDate(post.createdAt) }}</span>
-                  <span> • </span>
-                  <span>{{ calculateReadTime(post.excerpt) }} min read</span>
-                </div>
+                <span class="text-gray-500 text-xs">{{ formatDate(post.createdAt) }}</span>
               </div>
             </div>
-
-            <!-- Clickable post content area -->
-            <div 
-              class="space-y-3 cursor-pointer rounded-lg flex-grow"
-              @click="navigateToPost(post.id)"
+            
+            <!-- Post Type Badge -->
+            <span 
+              :class="[
+                'text-xs px-2 py-1 rounded-full font-medium',
+                post.type === 'article' 
+                  ? 'bg-purple-100 text-purple-800' 
+                  : 'bg-blue-100 text-blue-800'
+              ]"
             >
+              {{ post.type || 'Post' }}
+            </span>
+          </div>
+
+          <!-- Post Content -->
+          <div class="cursor-pointer" :class="{ 'px-4 pb-4': isGridView }">
+            <!-- Post Image -->
+            <div @click="navigateTo(`/post/${post.id}`)">
+              <img 
+                v-if="post.coverImage"
+                :src="post.coverImage" 
+                :alt="post.title"
+                class="w-full h-48 object-cover mb-3"
+                :class="{ 'rounded-lg': !isGridView, 'rounded-none -mx-4 -mt-3 mb-4': isGridView }"
+              >
+
               <!-- Post Title -->
-              <h3 class="text-xl font-bold leading-tight hover:text-blue-600 transition-colors">{{ post.title }}</h3>
+              <h3 class="text-lg font-bold text-gray-900 mb-2 line-clamp-2">{{ post.title }}</h3>
 
               <!-- Post Content -->
-              <p class="text-gray-600 line-clamp-3 text-sm">{{ post.excerpt }}</p>
-              
-              <!-- Post Image -->
-              <div v-if="post.banner" class="w-full h-48 rounded-lg overflow-hidden mt-3">
-                <img 
-                  :src="post.banner" 
-                  :alt="post.title"
-                  class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
-                >
+              <MDC :value="getExcerpt(post.Markdown)" class="text-gray-600 text-sm line-clamp-3 mb-3"></MDC>
+            </div>
+            
+            <!-- Post Stats -->
+            <div class="flex items-center text-gray-500 text-sm space-x-4 mt-2">
+              <div class="flex items-center">
+                <Icon name="solar:eye-bold" class="mr-1 text-gray-400" />
+                <span>{{ post.views || 0 }}</span>
               </div>
               
-              <!-- Post Stats -->
-              <div class="flex items-center text-sm text-gray-500 mt-4 pt-2 border-t border-gray-100">
-                <div class="flex items-center mr-4">
-                  <Icon name="solar:eye-bold" class="mr-1" />
-                  <span>{{ formatNumber(post.views) }} views</span>
-                </div>
-                <div class="flex items-center">
-                  <Icon name="solar:heart-bold" class="mr-1 text-red-500" />
-                  <span>{{ formatNumber(post.likes) }}</span>
-                </div>
+              <!-- Like Button with Realtime Functionality -->
+              <button @click="toggleLike(post)" class="flex items-center focus:outline-none group">
+                <Icon 
+                  :name="post.userLiked ? 'solar:heart-bold' : 'solar:heart-outline'" 
+                  :class="post.userLiked ? 'text-red-500' : 'text-gray-400 group-hover:text-red-500'"
+                  class="mr-1 transition-colors"
+                />
+                <span>{{ post.likes || 0 }}</span>
+              </button>
+              
+              <!-- Read More for Articles -->
+              <div v-if="post.type === 'article'" class="ml-auto">
+                <span @click="navigateTo(`/post/${post.id}`)" class="text-blue-500 hover:text-blue-700 font-medium flex items-center">
+                  Read More
+                  <Icon name="solar:arrow-right-bold" class="ml-1" />
+                </span>
               </div>
             </div>
           </div>
@@ -168,156 +184,254 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { databases, DATABASE_ID, USERS_COLLECTION_ID, POSTS_COLLECTION_ID } from '~/utils/appwrite';
-import { Query } from 'appwrite';
-
-const route = useRoute();
-const router = useRouter();
-const currentUser = useState('currentUser', () => null);
-
-const user = ref(null);
-const loading = ref(true);
-const loadingPosts = ref(true);
-const posts = ref([]);
-const isGridView = ref(false);
-
-const isCurrentUser = computed(() => {
-  return currentUser.value && user.value && currentUser.value.$id === user.value.$id;
+// Define middleware
+definePageMeta({
+  middleware: ['auth']
 });
+import { ref, onMounted, computed, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { databases, client, DATABASE_ID, POSTS_COLLECTION_ID, USERS_COLLECTION_ID } from '~/utils/appwrite'
+import { Query } from 'appwrite'
 
-const isFollowing = ref(false); // This would need to be implemented with actual following data
+const route = useRoute()
+const user = ref(null)
+const loading = ref(true)
+const isCurrentUser = ref(false)
+const isFollowing = ref(false)
+const posts = ref([])
+const isGridView = ref(false)
+const currentUser = useState('currentUser', () => null)
 
+// Realtime subscription
+let unsubscribe = null
+
+// Format date
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
+}
+
+// Get excerpt from markdown content
+const getExcerpt = (markdown) => {
+  if (!markdown) return ''
+  // Remove markdown formatting for excerpt
+  const plainText = markdown
+    .replace(/#+\s/g, '') // Remove headings
+    .replace(/\*\*/g, '')  // Remove bold
+    // .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Replace links with just text
+    .replace(/!\[([^\]]+)\]\([^)]+\)/g, '') // Remove images
+    .replace(/```[^`]*```/g, '') // Remove code blocks
+    
+  return plainText.length > 150 ? plainText.substring(0, 150) + '...' : plainText
+}
+
+// Toggle like for a post with realtime updates
+const toggleLike = async (post) => {
+  if (!currentUser.value) {
+    alert('Please log in to like posts')
+    return
+  }
+
+  try {
+    const userId = currentUser.value.$id
+    const postId = post.id
+    
+    // Get current post data
+    const postDoc = await databases.getDocument(
+      DATABASE_ID,
+      POSTS_COLLECTION_ID,
+      postId
+    )
+    
+    // Check if user already liked this post
+    const likedBy = postDoc.likedBy || []
+    const userIndex = likedBy.indexOf(userId)
+    
+    let updatedLikes = postDoc.likes || 0
+    let updatedLikedBy = [...likedBy]
+    
+    if (userIndex === -1) {
+      // User hasn't liked the post yet, so add like
+      updatedLikes++
+      updatedLikedBy.push(userId)
+      post.userLiked = true
+    } else {
+      // User already liked the post, so remove like
+      updatedLikes = Math.max(0, updatedLikes - 1)
+      updatedLikedBy.splice(userIndex, 1)
+      post.userLiked = false
+    }
+    
+    // Update in Appwrite
+    await databases.updateDocument(
+      DATABASE_ID,
+      POSTS_COLLECTION_ID,
+      postId,
+      { 
+        likes: updatedLikes,
+        likedBy: updatedLikedBy
+      }
+    )
+    
+    // Update local state (will be overridden by realtime update)
+    post.likes = updatedLikes
+  } catch (err) {
+    console.error('Error toggling like:', err)
+  }
+}
+
+// Subscribe to realtime updates for posts
+const subscribeToRealtimeUpdates = () => {
+  unsubscribe = client.subscribe(`databases.${DATABASE_ID}.collections.${POSTS_COLLECTION_ID}.documents`, response => {
+    // Handle realtime updates
+    if (response.events.includes('databases.*.collections.*.documents.*.update')) {
+      const updatedDoc = response.payload
+      
+      // Find and update the post in our local state
+      const postIndex = posts.value.findIndex(p => p.id === updatedDoc.$id)
+      if (postIndex !== -1) {
+        // Update post properties
+        posts.value[postIndex].likes = updatedDoc.likes || 0
+        posts.value[postIndex].views = updatedDoc.views || 0
+        posts.value[postIndex].isHidden = updatedDoc.isHidden || false
+        
+        // Update liked status if current user is available
+        if (currentUser.value) {
+          const userId = currentUser.value.$id
+          const likedBy = updatedDoc.likedBy || []
+          posts.value[postIndex].userLiked = likedBy.includes(userId)
+        }
+      }
+    }
+  })
+}
+
+// Fetch user profile
 const fetchUser = async (userId) => {
   try {
-    loading.value = true;
+    loading.value = true
     
+    // Get user profile from database
     const response = await databases.getDocument(
       DATABASE_ID,
       USERS_COLLECTION_ID,
       userId
-    );
+    )
     
-    user.value = response;
+    user.value = response
     
-    // Initialize following stats if not present
-    user.value.followers = user.value.followers || 0;
-    user.value.following = user.value.following || 0;
+    // Check if this is the current user
+    isCurrentUser.value = currentUser.value && currentUser.value.$id === userId
+    
+    // Fetch user's posts
+    await fetchUserPosts(userId)
+    
+    // Subscribe to realtime updates
+    subscribeToRealtimeUpdates()
     
   } catch (error) {
-    console.error('Error fetching user:', error);
+    console.error('Error fetching user:', error)
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
+// Fetch user's posts
 const fetchUserPosts = async (userId) => {
   try {
-    loadingPosts.value = true;
+    // Create query conditions
+    const queryConditions = [
+      Query.equal("authorId", userId),
+      Query.isNull("isDeletedAt"),
+      Query.orderDesc('createdAt')
+    ]
+    
+    // If not the profile owner, only show public posts
+    if (!isCurrentUser.value) {
+      queryConditions.push(Query.equal("isHidden", false))
+    }
     
     const response = await databases.listDocuments(
       DATABASE_ID,
       POSTS_COLLECTION_ID,
-      [
-        Query.equal('authorId', userId),
-        Query.isNull('isDeletedAt'),
-        Query.orderDesc('createdAt'),
-        Query.limit(20)
-      ]
-    );
+      queryConditions
+    )
     
-    posts.value = response.documents.map(doc => ({
-      id: doc.$id,
-      title: doc.title,
-      excerpt: doc.Markdown ? doc.Markdown.substring(0, 150) + '...' : '',
-      banner: doc.coverImage || null,
-      createdAt: doc.createdAt,
-      views: doc.views || 0,
-      likes: doc.likes || 0
-    }));
+    // Process posts
+    posts.value = response.documents.map(doc => {
+      // Check if current user has liked this post
+      const userLiked = currentUser.value &&
+        doc.likedBy &&
+        doc.likedBy.includes(currentUser.value.$id)
+        
+      return {
+        id: doc.$id,
+        title: doc.title,
+        Markdown: doc.Markdown,
+        coverImage: doc.coverImage,
+        authorId: doc.authorId,
+        tags: doc.tags || [],
+        views: doc.views || 0,
+        likes: doc.likes || 0,
+        status: doc.status || 'published',
+        createdAt: doc.createdAt,
+        likedBy: doc.likedBy || [],
+        isHidden: doc.isHidden || false,
+        type: doc.type || 'post',
+        userLiked: userLiked
+      }
+    })
     
   } catch (error) {
-    console.error('Error fetching user posts:', error);
-  } finally {
-    loadingPosts.value = false;
+    console.error('Error fetching user posts:', error)
   }
-};
+}
 
 const editProfile = () => {
-  // Navigate to profile edit page
-  router.push('/settings/profile');
-};
+  // Show profile edit dialog
+  const showProfileDialog = useState('showProfileDialog')
+  if (showProfileDialog) {
+    showProfileDialog.value = true
+  }
+}
 
 const toggleFollow = () => {
-  // This would need to be implemented with actual following functionality
-  isFollowing.value = !isFollowing.value;
+  // This would need to be implemented with actual follow functionality
+  isFollowing.value = !isFollowing.value
   if (user.value) {
-    user.value.followers += isFollowing.value ? 1 : -1;
+    user.value.followers = (user.value.followers || 0) + (isFollowing.value ? 1 : -1)
   }
-};
+}
 
 const toggleView = (mode) => {
-  isGridView.value = mode === 'grid';
-};
-
-const navigateToPost = (postId) => {
-  router.push(`/post/${postId}`);
-};
-
-const calculateReadTime = (text) => {
-  if (!text) return 1;
-  // Average reading speed: 200 words per minute
-  const wordCount = text.trim().split(/\s+/).length;
-  const readTime = Math.ceil(wordCount / 200);
-  return readTime < 1 ? 1 : readTime;
-};
-
-const formatNumber = (num) => {
-  if (!num) return 0;
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1) + 'M';
-  } else if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'K';
-  }
-  return num;
-};
-
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffTime = Math.abs(now - date);
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
-  if (diffDays <= 1) {
-    return 'Today';
-  } else if (diffDays <= 2) {
-    return 'Yesterday';
-  } else if (diffDays <= 7) {
-    return `${diffDays} days ago`;
-  } else {
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric' 
-    });
-  }
-};
+  isGridView.value = mode === 'grid'
+}
 
 onMounted(() => {
-  const userId = route.params.id;
-  fetchUser(userId);
-  fetchUserPosts(userId);
-});
+  const userId = route.params.id
+  if (userId) {
+    fetchUser(userId)
+  }
+})
+
+// Clean up subscription when component is unmounted
+onUnmounted(() => {
+  if (unsubscribe) {
+    unsubscribe()
+  }
+})
 </script>
 
 <style scoped>
-.hide-scrollbar {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-}
-
-.hide-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .line-clamp-3 {
@@ -325,9 +439,5 @@ onMounted(() => {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-button, a, img {
-  transition: all 0.2s ease-in-out;
 }
 </style>
