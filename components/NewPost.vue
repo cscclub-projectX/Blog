@@ -1,174 +1,167 @@
 <template>
-    <div class="bg-blue-100 p-4 rounded-2xl mb-4 relative">
+    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-6 relative">
         <!-- Overlay for disabled state -->
         <div v-if="disabled"
-            class="absolute inset-0 bg-gray-200 bg-opacity-70 rounded-2xl flex flex-col items-center justify-center z-10">
+            class="absolute inset-0 bg-white bg-opacity-90 rounded-lg flex flex-col items-center justify-center z-10">
             <Icon name="solar:lock-bold" class="text-4xl text-gray-700 mb-2" />
             <p class="text-gray-800 font-medium mb-3">Create a profile to start posting</p>
             <button @click="$emit('request-profile')"
-                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                class="bg-black text-white px-6 py-2 rounded-full hover:bg-gray-800 transition">
                 Create Profile
             </button>
         </div>
 
-        <h2 class="text-lg font-semibold mb-2">Create a New Post</h2>
-
-        <div class="flex items-center   rounded-2xl bg-white mb-4 relative">
-            <NuxtImg :src="Profile?.profileImage" alt="User Avatar" class="w-10 h-10 rounded-full m-2" />
-            <input v-model="postTitle" type="text" placeholder="Title of your post..."
-                class="flex-1 p-2 bg-white border-none  focus:outline-none rounded-2xl" />
-            
-            <!-- Post Type Selector -->
-            <div class="flex items-center mr-2">
-                <select v-model="postType" class="bg-gray-100 text-gray-800 px-3 py-1 rounded-lg border-none focus:ring-2 focus:ring-blue-300">
-                    <option value="post">Post</option>
-                    <option value="article">Article</option>
-                </select>
-            </div>
-            <!-- <button @click="toggleVisibility" class="p-2 text-gray-600 hover:text-gray-800">
-                <i class="fas fa-share-alt text-xl"></i>
-            </button> -->
-            <!-- <div v-if="isVisibilityOpen" class="absolute right-1 bg-gray-100  rounded-2xl p-2 flex space-x-3">
-                <button @click="setVisibility('public')" class="flex items-center text-gray-600 hover:text-gray-800">
-                    <i class="fas fa-globe text-xl"></i>
-                </button>
-                <button @click="setVisibility('friends')" class="flex items-center text-gray-600 hover:text-gray-800">
-                    <i class="fas fa-users text-xl"></i>
-                </button>
-                <button @click="setVisibility('onlyMe')" class="flex items-center text-gray-600 hover:text-gray-800">
-                    <i class="fas fa-lock text-xl"></i>
-                </button>
-            </div> -->
-        </div>
-        <div>
-            <!-- Cover Image Preview (only shown when image is uploaded) -->
-            <div v-if="coverImagePreview && showEditor" class="bg-white rounded-2xl p-4 mb-4">
-                <div class="flex justify-between items-center mb-2">
-                    <h2 class="text-lg font-semibold">Cover Image</h2>
-                    <button @click="removeCoverImage" class="text-red-500 text-sm flex items-center">
-                        <Icon name="solar:trash-bin-trash-bold" class="mr-1" />
-                        Remove
-                    </button>
+        <!-- User Info and Post Type Selector -->
+        <div class="flex items-center space-x-3 mb-4">
+            <NuxtImg :src="Profile?.profileImage" alt="User Avatar" class="w-10 h-10 rounded-full" />
+            <div class="flex-1">
+                <p class="font-medium text-gray-800">{{ Profile?.name || 'Your Name' }}</p>
+                <div class="flex items-center text-sm text-gray-500">
+                    <select v-model="postType" class="bg-transparent border-none p-0 pr-4 focus:ring-0 text-gray-500 cursor-pointer">
+                        <option value="post">Short Post</option>
+                        <option value="article">Full Article</option>
+                    </select>
                 </div>
-                <img :src="coverImagePreview" alt="Cover image preview"
-                    class="w-full h-48 object-cover rounded-lg" />
+            </div>
+        </div>
+
+        <!-- Title Input - Medium-style large input -->
+        <input v-model="postTitle" type="text" placeholder="Title"
+            class="w-full text-xl md:text-2xl font-bold mb-4 border-none p-0 focus:outline-none focus:ring-0" />
+
+        <!-- Cover Image Preview -->
+        <div v-if="coverImagePreview" class="mb-6 relative group">
+            <img :src="coverImagePreview" alt="Cover image preview"
+                class="w-full h-48 md:h-64 object-cover rounded-lg" />
+            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
+                <button @click="removeCoverImage" class="bg-white text-red-500 p-2 rounded-full">
+                    <Icon name="solar:trash-bin-trash-bold" class="text-xl" />
+                </button>
+            </div>
+        </div>
+
+        <!-- Editor Toggle Button -->
+        <div v-if="!showEditor" class="flex items-center space-x-2 mb-4 cursor-pointer" @click="toggleEditor">
+            <div class="w-full border-b border-gray-200 py-3 text-gray-500 hover:text-gray-700 transition-colors">
+                <p class="text-sm">Tell your story...</p>
             </div>
         </div>
     
         <!-- Rich Text Editor -->
-        <div v-if="showEditor" class="bg-white rounded-2xl p-4 mb-4">
-            <div class="editor-menu flex flex-wrap gap-2 mb-2 border-b pb-2">
+        <div v-if="showEditor" class="mb-6">
+            <div class="editor-menu flex flex-wrap gap-2 mb-3 border-b pb-2">
                 <button @click="editor.chain().focus().toggleBold().run()"
-                    :class="{ 'bg-blue-100': editor.isActive('bold') }" class="p-1 rounded hover:bg-gray-100">
+                    :class="{ 'bg-gray-100': editor.isActive('bold') }" 
+                    class="p-1.5 rounded-full hover:bg-gray-100 transition-colors">
                     <Icon name="solar:text-bold-bold" class="text-lg"></Icon>
                 </button>
                 <button @click="editor.chain().focus().toggleItalic().run()"
-                    :class="{ 'bg-blue-100': editor.isActive('italic') }" class="p-1 rounded hover:bg-gray-100">
+                    :class="{ 'bg-gray-100': editor.isActive('italic') }" 
+                    class="p-1.5 rounded-full hover:bg-gray-100 transition-colors">
                     <Icon name="solar:text-italic-bold" class="text-lg"></Icon>
                 </button>
                 <button @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
-                    :class="{ 'bg-blue-100': editor.isActive('heading', { level: 2 }) }"
-                    class="p-1 rounded hover:bg-gray-100">
+                    :class="{ 'bg-gray-100': editor.isActive('heading', { level: 2 }) }"
+                    class="p-1.5 rounded-full hover:bg-gray-100 transition-colors">
                     <Icon name="solar:text-bold" class="text-lg"></Icon>
                 </button>
                 <button @click="editor.chain().focus().toggleBulletList().run()"
-                    :class="{ 'bg-blue-100': editor.isActive('bulletList') }" class="p-1 rounded hover:bg-gray-100">
+                    :class="{ 'bg-gray-100': editor.isActive('bulletList') }" 
+                    class="p-1.5 rounded-full hover:bg-gray-100 transition-colors">
                     <Icon name="solar:list-bold" class="text-lg"></Icon>
                 </button>
                 <button @click="editor.chain().focus().toggleOrderedList().run()"
-                    :class="{ 'bg-blue-100': editor.isActive('orderedList') }" class="p-1 rounded hover:bg-gray-100">
+                    :class="{ 'bg-gray-100': editor.isActive('orderedList') }" 
+                    class="p-1.5 rounded-full hover:bg-gray-100 transition-colors">
                     <Icon name="solar:list-check-bold" class="text-lg"></Icon>
                 </button>
                 <button @click="editor.chain().focus().toggleBlockquote().run()"
-                    :class="{ 'bg-blue-100': editor.isActive('blockquote') }" class="p-1 rounded hover:bg-gray-100">
+                    :class="{ 'bg-gray-100': editor.isActive('blockquote') }" 
+                    class="p-1.5 rounded-full hover:bg-gray-100 transition-colors">
                     <Icon name="solar:traffic-bold" class="text-lg"></Icon>
                 </button>
 
                 <!-- Image upload button -->
-                <button @click="$refs.imageInput.click()" class="p-1 rounded hover:bg-gray-100">
+                <button @click="$refs.imageInput.click()" 
+                    class="p-1.5 rounded-full hover:bg-gray-100 transition-colors">
                     <Icon name="solar:gallery-add-bold" class="text-lg"></Icon>
                 </button>
                 <input ref="imageInput" type="file" accept="image/*" class="hidden" @change="uploadImage" />
 
                 <!-- Code block button -->
                 <button @click="editor.chain().focus().toggleCodeBlock().run()"
-                    :class="{ 'bg-blue-100': editor.isActive('codeBlock') }" class="p-1 rounded hover:bg-gray-100">
+                    :class="{ 'bg-gray-100': editor.isActive('codeBlock') }" 
+                    class="p-1.5 rounded-full hover:bg-gray-100 transition-colors">
                     <Icon name="solar:code-square-bold" class="text-lg"></Icon>
                 </button>
 
                 <!-- Horizontal rule button -->
-                <button @click="editor.chain().focus().setHorizontalRule().run()" class="p-1 rounded hover:bg-gray-100">
+                <button @click="editor.chain().focus().setHorizontalRule().run()" 
+                    class="p-1.5 rounded-full hover:bg-gray-100 transition-colors">
                     <Icon name="solar:minus-square-bold" class="text-lg"></Icon>
                 </button>
 
                 <!-- Toggle markdown view button -->
-                <button @click="toggleMarkdownView" :class="{ 'bg-blue-100': showMarkdown }"
-                    class="p-1 rounded hover:bg-gray-100 ml-auto">
+                <button @click="toggleMarkdownView" :class="{ 'bg-gray-100': showMarkdown }"
+                    class="p-1.5 rounded-full hover:bg-gray-100 transition-colors ml-auto">
                     <Icon name="solar:document-text-bold" class="text-lg"></Icon>
                 </button>
             </div>
 
             <!-- Markdown view -->
             <div v-if="showMarkdown" class="mb-4">
-                <textarea v-model="markdownContent" class="w-full min-h-[150px] p-2 border rounded-lg font-mono text-sm"
-                    placeholder="Write your content in Markdown..." @input="updateFromMarkdown"></textarea>
+                <textarea v-model="markdownContent" 
+                    class="w-full min-h-[200px] p-3 border rounded-lg font-mono text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300"
+                    placeholder="Write your content in Markdown..." 
+                    @input="updateFromMarkdown"></textarea>
             </div>
 
             <!-- Rich text editor view -->
-            <editor-content v-else :editor="editor" class="min-h-[150px] focus:outline-none" />
+            <editor-content v-else :editor="editor" class="min-h-[200px] focus:outline-none prose max-w-none" />
         </div>
-    <!-- Tags Input Section -->
-    <div v-if="false" class="bg-white rounded-2xl p-4 mb-4">
-        <h2 class="text-lg font-semibold mb-2">Tags</h2>
-        <div class="relative">
-            <div class="flex flex-wrap gap-2 items-center p-2 border border-gray-300 rounded-lg min-h-[42px]">
-                <!-- Tags inside input area -->
-                <div v-for="(tag, index) in tags" :key="index" 
-                    class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full flex items-center text-sm">
-                    <span>{{ tag }}</span>
-                    <button @click="removeTag(index)" class="ml-1 text-blue-600 hover:text-blue-800">
-                        <Icon name="solar:close-circle-bold" class="text-xs" />
-                    </button>
+
+        <!-- Tags Input Section -->
+        <div v-if="showEditor" class="mb-6">
+            <h3 class="text-sm font-medium text-gray-700 mb-2">Add tags (up to 5)</h3>
+            <div class="relative">
+                <div class="flex flex-wrap gap-2 items-center p-2 border border-gray-200 rounded-lg min-h-[42px]">
+                    <!-- Tags inside input area -->
+                    <div v-for="(tag, index) in tags" :key="index" 
+                        class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full flex items-center text-sm">
+                        <span>{{ tag }}</span>
+                        <button @click="removeTag(index)" class="ml-1 text-gray-500 hover:text-gray-700">
+                            <Icon name="solar:close-circle-bold" class="text-xs" />
+                        </button>
+                    </div>
+                    
+                    <!-- Input field inline with tags -->
+                    <input 
+                        v-model="tagInput" 
+                        @keydown.enter.prevent="addTag"
+                        type="text" 
+                        placeholder="Add a tag and press Enter"
+                        class="flex-1 min-w-[120px] border-none p-0 focus:outline-none focus:ring-0"
+                    />
                 </div>
-                
-                <!-- Input field inline with tags -->
-                <input 
-                    v-model="tagInput" 
-                    @keydown.enter.prevent="addTag"
-                    type="text" 
-                    placeholder="Add tags (press Enter)"
-                    class="flex-1 min-w-[120px] border-none p-0 focus:outline-none focus:ring-0"
-                />
             </div>
-            
-            <!-- Add button positioned absolutely to the right -->
-            <button 
-                @click="addTag" 
-                class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-100 text-blue-600 px-2 py-1 rounded-lg hover:bg-blue-200 text-sm"
-            >
-                Add
-            </button>
+            <p class="text-xs text-gray-500 mt-1">Add relevant tags to help others discover your post</p>
         </div>
-        <p class="text-xs text-gray-500 mt-1">Add relevant tags to help others discover your post</p>
-    </div>
-        <div class="flex items-center justify-between mt-2">
-            <button v-if="!showEditor" @click="toggleEditor"
-                class="text-blue-500 hover:text-blue-700 flex items-center">
-                <Icon name="solar:pen-bold" class="text-xl mr-1"></Icon>
-                <span>Write content</span>
-            </button>
-            <div class="flex-grow"></div>
-            
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-between mt-4">
             <!-- Cover Image Upload Button -->
             <input ref="coverImageInput" type="file" accept="image/*" class="hidden" @change="uploadCoverImage" />
             <button v-if="showEditor" @click="$refs.coverImageInput.click()" 
-                class="mr-2 bg-gray-100 text-gray-700 p-2 rounded-2xl hover:bg-gray-200 transition-colors"
-                title="Add cover image"> <span class="flex items-center justify-center gap-2">Add Cover Image<Icon name="solar:gallery-add-bold" class="text-xl"></Icon></span>
-                
+                class="text-gray-600 hover:text-gray-800 transition-colors flex items-center gap-1">
+                <Icon name="solar:gallery-add-bold" class="text-lg"></Icon>
+                <span class="text-sm">Add cover image</span>
             </button>
+            <div class="flex-grow"></div>
             
-            <button @click="submitPost" class="bg-blue-400 text-white px-4 py-2 rounded-2xl w-24 hover:bg-blue-600">
-                Post
+            <!-- Publish Button -->
+            <button @click="submitPost" 
+                class="bg-black text-white px-5 py-2 rounded-full hover:bg-gray-800 transition-colors">
+                Publish
             </button>
         </div>
     </div>
@@ -240,7 +233,6 @@ const toggleVisibility = () => {
 };
 
 const toggleEditor = () => {
-    console.log('Toggle editor clicked');
     showEditor.value = !showEditor.value;
 
     // Force a re-render if needed
@@ -289,7 +281,6 @@ const uploadImage = (event) => {
 const setVisibility = (option) => {
     visibility.value = option;
     isVisibilityOpen.value = false; // Close the visibility options after selection
-    console.log('Visibility set to:', visibility.value);
 };
 
 const submitPost = async () => {
@@ -381,7 +372,6 @@ const submitPost = async () => {
 };
 
 const uploadCoverImage = (event) => {
-    console.log(event)
     const file = event.target.files[0];
     if (!file) return;
 
@@ -444,14 +434,48 @@ const removeTag = (index) => {
 <style scoped>
 :deep(.ProseMirror) {
     outline: none;
-    min-height: 150px;
+    min-height: 200px;
+    font-family: 'Charter', 'Georgia', serif;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #292929;
 }
 
 :deep(.ProseMirror p.is-editor-empty:first-child::before) {
-    content: attr(data-placeholder);
+    content: "Tell your story...";
     float: left;
     color: #adb5bd;
     pointer-events: none;
     height: 0;
+    font-style: italic;
+}
+
+:deep(.ProseMirror h2) {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+:deep(.ProseMirror blockquote) {
+    border-left: 3px solid #292929;
+    padding-left: 1rem;
+    font-style: italic;
+    margin: 1rem 0;
+}
+
+:deep(.ProseMirror img) {
+    max-width: 100%;
+    border-radius: 0.375rem;
+    margin: 1rem 0;
+}
+
+:deep(.ProseMirror pre) {
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9rem;
+    overflow-x: auto;
 }
 </style>
