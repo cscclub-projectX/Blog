@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4  max-w-4xl mx-auto md:mb-3 sm:mb-15 xs:mb-15">
+  <div class="p-4 max-w-4xl mx-auto md:mb-3 sm:mb-15 xs:mb-15">
     <!-- Login Dialog -->
     <LoginDialog />
 
@@ -25,66 +25,110 @@
         <p class="text-gray-600">Loading posts...</p>
       </div>
 
-      <div v-else-if="error" class="bg-red-100 text-red-700 p-4 rounded-lg">
+      <div v-else-if="error" class="bg-red-100 text-red-700 p-4 rounded-lg shadow-sm">
         <p>{{ error }}</p>
       </div>
 
-      <div v-else-if="filteredPosts.length === 0" class="bg-gray-100 p-8 rounded-lg text-center">
+      <div v-else-if="filteredPosts.length === 0" class="bg-gray-100 p-8 rounded-lg text-center shadow-sm">
         <Icon name="solar:document-text-bold" class="text-4xl text-gray-400 mb-2" />
         <p class="text-gray-600">No posts found. Create your first post!</p>
       </div>
 
-      <div v-else v-for="post in filteredPosts" :key="post.id"
-        class="bg-white p-4 rounded-lg  hover:shadow-md transition-shadow duration-200">
-
-        <div class="flex items-center mb-2">
-          <div @click="navigateToProfile(post.authorId)" class="flex justify-between w-full">
-            <div class="flex items-center">
-              <img :src="post.authorAvatar" alt="Author" class="w-10 h-10 rounded-full mr-2 " />
+      <!-- Posts List -->
+      <div v-else class="space-y-4">
+        <div v-for="post in filteredPosts" :key="post.id"
+          class="bg-gray-100 p-4 rounded-xl  hover:shadow-md transition-shadow duration-200">
+          
+          <!-- Post Header -->
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center" @click="navigateToProfile(post.authorId)" style="cursor: pointer;">
+              <img :src="post.authorAvatar" alt="Author" class="w-10 h-10 rounded-full mr-3 border border-gray-200" />
               <div class="flex flex-col">
-                <span class="font-medium xs:text-sm sm:text-sm">{{ post.authorName }}</span>
-                <span class="text-gray-500 text-sm xs:text-xs sm:text-xs">{{ post.authorUsername }}</span>
+                <span class="font-medium text-gray-900">{{ post.authorName }}</span>
+                <div class="flex items-center text-gray-500 text-sm">
+                  <span>{{ post.authorUsername }}</span>
+                  <span class="mx-1">·</span>
+                  <span>{{ formatDate(post.createdAt) }}</span>
+                </div>
               </div>
             </div>
-            <div class="flex gap-1 items-center">
-              <span class="text-gray-500 text-sm xs:text-xs sm:text-xs ml-auto">{{ formatDate(post.createdAt)
-              }}</span>
-              <span v-if="post.isHidden"
-                class="text-gray-500 text-sm xs:text-xs sm:text-xs ml-auto bg-red-100 rounded-full px-2 py-1 gap-1 flex items-center"><i
-                  class="fas fa-lock text-sm"></i> {{ post.isHidden ? 'Hidden' : 'Visible' }}</span>
-              <span v-else
-                class="text-gray-500 text-sm xs:text-xs sm:text-xs ml-auto bg-green-100 rounded-full px-2 py-1 gap-1 flex items-center"><i
-                  class="fas fa-globe text-sm"></i> {{ post.isHidden ? 'Hidden' : 'Visible' }}</span>
+            
+            <!-- Post Type Badge -->
+            <span 
+              :class="[
+                'text-xs px-2 py-1 rounded-full font-medium',
+                post.type === 'article' 
+                  ? 'bg-purple-100 text-purple-800' 
+                  : 'bg-blue-100 text-blue-800'
+              ]"
+            >
+              {{ post.type || 'Post' }}
+            </span>
+          </div>
+          
+          <!-- Post Content -->
+          <div class="cursor-pointer" @click="navigateTo(`/post/${post.id}`)">
+            <!-- Post Title -->
+            <h3 class="text-lg font-bold text-gray-900 mb-3 line-clamp-2">{{ post.title }}</h3>
+            
+            <!-- Post Cover Image -->
+            <img v-if="post.banner" :src="post.banner" alt="Post banner"
+              class="w-full h-48 object-cover mb-4 rounded-lg" />
+            
+            <!-- Post Excerpt -->
+            <div class="text-gray-600 text-sm line-clamp-3 mb-4">
+              <MDC :value="getExcerpt(post.excerpt)" tag="article" class="prose prose-sm max-w-none" />
             </div>
           </div>
-        </div>
-        <div @click="navigateTo(`/post/${post.id}`)">
-          <h3 class="font-semibold text-lg mb-2">{{ post.title }}</h3>
-
-          <img v-if="post.banner" :src="post.banner" alt="Post banner"
-            class="w-full h-48 object-cover mb-3 rounded-lg" />
-
-          <MDC :value="post.excerpt" tag="article" class="prose prose-sm max-w-none mb-3" />
-        </div>
-        <div class="flex items-center mt-3 text-gray-500 border-t pt-3">
-          <div class="flex items-center mr-4">
-            <Icon name="solar:eye-bold" class="mr-1" />
-            <span>{{ post.views }}</span>
-          </div>
-
-          <button @click="toggleLike(post)" class="flex items-center mr-4 focus:outline-none">
-            <Icon :name="post.userLiked ? 'solar:heart-bold' : 'solar:heart-outline'"
-              :class="post.userLiked ? 'text-red-500' : 'text-gray-500'" class="mr-1" />
-            <span>{{ post.likes }}</span>
-          </button>
-
-          <div v-if="post.authorId === currentUser?.$id" class="ml-auto flex space-x-2">
-            <NuxtLink :to="`/posts?edit=${post.id}`" class="text-blue-500 hover:text-blue-700">
-              <Icon name="solar:pen-bold" />
-            </NuxtLink>
-            <button @click="toggleHidePost(post)" class="text-gray-500 hover:text-gray-700">
-              <Icon :name="post.isHidden ? 'solar:eye-closed-bold' : 'solar:eye-bold'" />
-            </button>
+          
+          <!-- Post Actions -->
+          <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+            <div class="flex items-center space-x-4">
+              <!-- Views -->
+              <div class="flex items-center text-gray-500">
+                <Icon name="solar:eye-bold" class="mr-1 text-gray-400" />
+                <span>{{ post.views }}</span>
+              </div>
+              
+              <!-- Like Button with Realtime Functionality -->
+              <button @click="toggleLike(post)" class="flex items-center focus:outline-none group">
+                <Icon 
+                  :name="post.userLiked ? 'solar:heart-bold' : 'solar:heart-outline'" 
+                  :class="post.userLiked ? 'text-red-500' : 'text-gray-400 group-hover:text-red-500'"
+                  class="mr-1 transition-colors"
+                />
+                <span>{{ post.likes }}</span>
+              </button>
+              
+              <!-- Visibility Badge -->
+              <span v-if="post.isHidden" class="text-xs bg-red-100 text-red-600 rounded-full px-2 py-0.5 flex items-center">
+                <Icon name="solar:lock-bold" class="mr-1 text-xs" />
+                Private
+              </span>
+              <span v-else class="text-xs bg-green-100 text-green-600 rounded-full px-2 py-0.5 flex items-center">
+                <Icon name="solar:globe-bold" class="mr-1 text-xs" />
+                Public
+              </span>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+              <!-- Read More for Articles -->
+              <NuxtLink v-if="post.type === 'article'" :to="`/post/${post.id}`" 
+                class="text-blue-500 hover:text-blue-700 text-sm font-medium flex items-center">
+                Read More
+                <Icon name="solar:arrow-right-bold" class="ml-1" />
+              </NuxtLink>
+              
+              <!-- Author Actions -->
+              <div v-if="post.authorId === currentUser?.$id" class="flex space-x-2">
+                <NuxtLink :to="`/posts?edit=${post.id}`" class="text-gray-500 hover:text-blue-600 p-1 rounded-full hover:bg-gray-100">
+                  <Icon name="solar:pen-bold" />
+                </NuxtLink>
+                <button @click="toggleHidePost(post)" class="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100">
+                  <Icon :name="post.isHidden ? 'solar:eye-closed-bold' : 'solar:eye-bold'" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -159,7 +203,7 @@ const formatDate = (dateString) => {
 
 const navigateToProfile = (userId) => {
   console.log(userId);
-    router.push(`/user/${userId.$id}`);
+  router.push(`/user/${userId.$id}`);
 };
 
 // Increment view count for a post
@@ -252,7 +296,18 @@ const toggleLike = async (post) => {
     console.error('Error toggling like:', err);
   }
 };
-
+const getExcerpt = (markdown) => {
+  if (!markdown) return ''
+  // Remove markdown formatting for excerpt
+  const plainText = markdown
+    .replace(/#+\s/g, '') // Remove headings
+    .replace(/\*\*/g, '')  // Remove bold
+    // .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Replace links with just text
+    .replace(/!\[([^\]]+)\]\([^)]+\)/g, '') // Remove images
+    .replace(/```[^`]*```/g, '') // Remove code blocks
+    
+  return plainText.length > 150 ? plainText.substring(0, 150) + '...' : plainText
+}
 // Toggle hide post
 const toggleHidePost = async (post) => {
   if (!currentUser.value || post.authorId !== currentUser.value.$id) {
@@ -323,7 +378,8 @@ const handleNewPost = async (newPostData) => {
       isHidden: newPostData.isHidden || false,
       isDeletedAt: newPostData.isDeletedAt || null,
       userLiked: false,
-      viewIncremented: false
+      viewIncremented: false,
+      type: newPostData.type || 'post' // Add the post type
     };
 
     // Add the new post to the beginning of the featuredPosts array
@@ -406,7 +462,8 @@ onMounted(async () => {
         isHidden: doc.isHidden || false,
         isDeletedAt: doc.isDeletedAt || null,
         userLiked: userLiked,
-        viewIncremented: false
+        viewIncremented: false,
+        type: doc.type || 'post' // Add the post type with default value
       };
     }));
 
@@ -435,5 +492,17 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Additional styles can be added here */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 </style>

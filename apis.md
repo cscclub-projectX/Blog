@@ -37,6 +37,7 @@ In **Appwrite**, we need to create **three collections**:
 | `likes`     | Integer         | ❌ No (default 0) | Tracks likes. |
 | `likedBy`   | Array of Strings | ❌ No       | List of post tags/categories. |
 | `status`    | Enum (`draft` / `published`) | ❌ No (default `published`) | Post status (draft or published). |
+| `type`    | Enum (`post` / `article`) | ❌ No (default `article`) | Post type. |
 | `isHidden`    | boolean (`false` / `true`) | ❌ No  (default `false`) | Post status (draft or published). |
 | `createdAt` | Date (Auto)      | ✅ Yes       | Date of creation. |
 | `isDeletedAt` | Date (Auto)    | ❌ No      | Date of deletion. |
