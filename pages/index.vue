@@ -35,102 +35,109 @@
       </div>
 
       <!-- Posts List -->
-      <div v-else class="space-y-4">
+      <div v-else class="space-y-6">
         <div v-for="post in filteredPosts" :key="post.id"
-          class="bg-gray-100 p-4 rounded-xl  hover:shadow-md transition-shadow duration-200">
+          class="bg-white p-6 rounded-lg border border-black/10 hover:shadow-md transition-shadow duration-200">
           
           <!-- Post Header -->
-          <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center mb-4">
             <div class="flex items-center" @click="navigateToProfile(post.authorId)" style="cursor: pointer;">
-              <img :src="post.authorAvatar" alt="Author" class="w-10 h-10 rounded-full mr-3 border border-gray-200" />
+              <img :src="post.authorAvatar" alt="Author" class="w-8 h-8 rounded-full mr-3 border border-gray-200" />
               <div class="flex flex-col">
                 <span class="font-medium text-gray-900">{{ post.authorName }}</span>
-                <div class="flex items-center text-gray-500 text-sm">
-                  <span>{{ post.authorUsername }}</span>
-                  <span class="mx-1">·</span>
+                <div class="flex items-center text-gray-500 text-xs">
                   <span>{{ formatDate(post.createdAt) }}</span>
+                  <span class="mx-1">·</span>
+                  <span>{{ post.type === 'article' ? '5 min read' : '1 min read' }}</span>
+                  <span v-if="post.authorId === currentUser?.$id" class="mx-1">·</span>
+                  <span v-if="post.authorId === currentUser?.$id" 
+                    class="text-xs text-gray-500">
+                    {{ post.isHidden ? 'Private' : 'Public' }}
+                  </span>
                 </div>
               </div>
             </div>
             
-            <!-- Post Type Badge -->
-            <span 
-              :class="[
-                'text-xs px-2 py-1 rounded-full font-medium',
-                post.type === 'article' 
-                  ? 'bg-purple-100 text-purple-800' 
-                  : 'bg-blue-100 text-blue-800'
-              ]"
+            <!-- Post Type Badge - Only for special types -->
+            <span v-if="post.type === 'article'"
+              class="ml-auto text-xs px-2 py-1 rounded-full font-medium bg-black text-white"
             >
-              {{ post.type || 'Post' }}
+              Article
             </span>
           </div>
           
-          <!-- Post Content -->
-          <div class="cursor-pointer" @click="navigateTo(`/post/${post.id}`)">
-            <!-- Post Title -->
-            <h3 class="text-lg font-bold text-gray-900 mb-3 line-clamp-2">{{ post.title }}</h3>
+          <!-- Post Content - Medium-style layout -->
+          <div class="flex flex-col md:flex-row gap-4 cursor-pointer" @click="navigateTo(`/post/${post.id}`)">
+            <!-- Text Content -->
+            <div class="flex-1">
+              <!-- Post Title -->
+              <h3 class="text-xl font-bold text-gray-900 mb-2 line-clamp-2">{{ post.title }}</h3>
+              
+              <!-- Post Excerpt -->
+              <div class="text-gray-600 text-base line-clamp-3 mb-3">
+                <MDC :value="getExcerpt(post.excerpt)" tag="article" class="prose prose-sm max-w-none" />
+              </div>
+              
+              <!-- Post Tags -->
+              <div v-if="post.tags && post.tags.length > 0" class="flex flex-wrap gap-2 mb-3">
+                <span v-for="tag in post.tags" :key="tag" 
+                  class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                  {{ tag }}
+                </span>
+              </div>
+            </div>
             
-            <!-- Post Cover Image -->
-            <img v-if="post.banner" :src="post.banner" alt="Post banner"
-              class="w-full h-48 object-cover mb-4 rounded-lg" />
-            
-            <!-- Post Excerpt -->
-            <div class="text-gray-600 text-sm line-clamp-3 mb-4">
-              <MDC :value="getExcerpt(post.excerpt)" tag="article" class="prose prose-sm max-w-none" />
+            <!-- Post Cover Image - Medium-style square image on the right -->
+            <div v-if="post.banner" class="md:w-1/3 md:max-w-[200px] flex-shrink-0">
+              <img :src="post.banner" alt="Post banner"
+                class="w-full h-32 md:h-28 object-cover rounded-lg" />
             </div>
           </div>
           
-          <!-- Post Actions -->
-          <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+          <!-- Post Actions - Medium-style subtle footer -->
+          <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
             <div class="flex items-center space-x-4">
-              <!-- Views -->
-              <div class="flex items-center text-gray-500">
-                <Icon name="solar:eye-bold" class="mr-1 text-gray-400" />
-                <span>{{ post.views }}</span>
-              </div>
-              
               <!-- Like Button with Realtime Functionality -->
-              <button @click="toggleLike(post)" class="flex items-center focus:outline-none group">
+              <button @click.stop="toggleLike(post)" class="flex items-center focus:outline-none group">
                 <Icon 
                   :name="post.userLiked ? 'solar:heart-bold' : 'solar:heart-outline'" 
                   :class="post.userLiked ? 'text-red-500' : 'text-gray-400 group-hover:text-red-500'"
                   class="mr-1 transition-colors"
                 />
-                <span>{{ post.likes }}</span>
+                <span class="text-sm text-gray-500">{{ post.likes }}</span>
               </button>
               
-              <!-- Visibility Badge -->
-              <span v-if="post.isHidden" class="text-xs bg-red-100 text-red-600 rounded-full px-2 py-0.5 flex items-center">
-                <Icon name="solar:lock-bold" class="mr-1 text-xs" />
-                Private
-              </span>
-              <span v-else class="text-xs bg-green-100 text-green-600 rounded-full px-2 py-0.5 flex items-center">
-                <Icon name="solar:globe-bold" class="mr-1 text-xs" />
-                Public
-              </span>
+              <!-- Views -->
+              <div class="flex items-center text-gray-500">
+                <Icon name="solar:eye-bold" class="mr-1 text-gray-400" />
+                <span class="text-sm">{{ post.views }}</span>
+              </div>
             </div>
             
             <div class="flex items-center space-x-3">
-              <!-- Read More for Articles -->
-              <NuxtLink v-if="post.type === 'article'" :to="`/post/${post.id}`" 
-                class="text-blue-500 hover:text-blue-700 text-sm font-medium flex items-center">
-                Read More
-                <Icon name="solar:arrow-right-bold" class="ml-1" />
-              </NuxtLink>
+              <!-- Save for later button -->
+              <button class="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100">
+                <Icon name="solar:bookmark-outline" />
+              </button>
               
               <!-- Author Actions -->
               <div v-if="post.authorId === currentUser?.$id" class="flex space-x-2">
-                <NuxtLink :to="`/posts?edit=${post.id}`" class="text-gray-500 hover:text-blue-600 p-1 rounded-full hover:bg-gray-100">
+                <NuxtLink :to="`/posts?edit=${post.id}`" class="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100">
                   <Icon name="solar:pen-bold" />
                 </NuxtLink>
-                <button @click="toggleHidePost(post)" class="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100">
+                <button @click.stop="toggleHidePost(post)" class="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100">
                   <Icon :name="post.isHidden ? 'solar:eye-closed-bold' : 'solar:eye-bold'" />
                 </button>
               </div>
             </div>
           </div>
         </div>
+        
+        <!-- Load More Button -->
+        <button v-if="filteredPosts.length >= 10" 
+          class="w-full py-3 border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 transition-colors">
+          See more stories
+        </button>
       </div>
     </div>
   </div>
