@@ -1,89 +1,129 @@
 <template>
-    <aside class=" p-4 space-y-6 h-screen overflow-y-auto bg-white rounded-l-2xl shadow-2xl md:shadow lg:shadow ">
-        <!-- Close Button -->
-        <div class="flex justify-start mb-4">
-            <button @click="closeSidebar" class="text-gray-600 bg-red-200 rounded-full  text-xs   p-2 hover:text-gray-800 md:hidden lg:hidden">
-              ❌ <!-- Close icon -->
+    <aside class="p-5 h-screen overflow-y-auto bg-white border-l border-gray-100">
+        <!-- Close Button (Mobile Only) -->
+        <div class="flex justify-end mb-4 md:hidden">
+            <button @click="closeSidebar" class="text-gray-500 hover:text-gray-700 p-1 rounded-full">
+                <Icon name="solar:close-circle-bold" class="text-xl" />
             </button>
-          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative mb-6">
+            <input 
+                type="text" 
+                placeholder="Search" 
+                class="w-full py-2 pl-10 pr-4 bg-gray-100 border-none rounded-full focus:bg-white focus:ring-1 focus:ring-gray-200"
+            />
+            <Icon name="solar:magnifer-linear" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        </div>
 
         <!-- Featured Posts -->
-        <div class="bg-white rounded-l-2xl p-4 ">
-            <h2 class="text-lg font-bold mb-4">🌟 Featured Posts</h2>
+        <div class="mb-8">
+            <h2 class="text-base font-bold mb-4 text-gray-900">Featured Posts</h2>
             <div v-if="isLoadingPosts" class="flex justify-center items-center h-32">
-                <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-300"></div>
             </div>
             <div v-else-if="featuredPosts.length === 0" class="text-center py-4 text-gray-500">
                 No featured posts available
             </div>
-            <div v-else class="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div v-else class="space-y-4">
                 <div v-for="post in displayedPosts" :key="post.id"
-                    class="rounded-xl hover:bg-blue-50 transition-all duration-200 cursor-pointer border border-gray-200"
+                    class="group cursor-pointer"
                     @click="navigateToPost(post.id)">
-                    <div class="relative p-2">
-                        <div class="flex items-center space-x-2 mb-2">
-                            <img :src="post.authorAvatar" alt="Author" class="w-6 h-6 rounded-full">
-                            <span class="text-sm font-medium text-gray-800">{{ post.authorName }}</span>
-                        </div>
-                        <div class="w-full h-24 rounded-lg overflow-hidden">
-                            <img v-if="post.banner" :src="post.banner" alt="Banner" class="w-full h-24 object-cover">
-                            <div v-else class="w-full h-24 bg-gray-100 flex items-center justify-center">
-                                <Icon name="solar:gallery-wide-bold" class="text-3xl text-gray-300" />
+                    <div class="flex items-start gap-3 border-black/10 border   rounded-lg p-2">
+                        <!-- Author Avatar -->
+                        <img :src="post.authorAvatar" alt="Author" class="w-6 h-6 rounded-full mt-1">
+                        
+                        <!-- Post Content -->
+                        <div class="flex-1">
+                            <!-- Author Name -->
+                            <div class="flex items-center mb-1">
+                                <span class="text-xs font-medium text-gray-800">{{ post.authorName }}</span>
+                            </div>
+                            
+                            <!-- Post Title -->
+                            <h3 class="font-bold text-sm group-hover:text-gray-900 text-gray-800 line-clamp-2 mb-1">
+                                {{ post.title }}
+                            </h3>
+                            
+                            <!-- Post Stats -->
+                            <div class="flex items-center text-xs text-gray-500">
+                                <span>{{ post.views }} views</span>
+                                <span class="mx-1">·</span>
+                                <span>{{ post.likes }} likes</span>
                             </div>
                         </div>
-                        <h3 class="font-medium mt-2 text-sm line-clamp-3">{{ post.title }}</h3>
-                        <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ post.excerpt }}</p>
+                        
+                        <!-- Post Thumbnail -->
+                        <div v-if="post.banner" class="w-16 h-16 flex-shrink-0 rounded-md overflow-hidden">
+                            <img :src="post.banner" alt="Banner" class="w-full h-full object-cover">
+                        </div>
                     </div>
                 </div>
             </div>
             <button v-if="hasMorePosts" @click="showMorePosts"
-                class="w-full mt-4 p-2 text-sm text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 border border-blue-100">
-                Show More
+                class="w-full mt-4 py-2 text-sm text-gray-500 hover:text-gray-800 transition-colors">
+                See more recommendations
             </button>
         </div>
 
         <!-- Trending Topics -->
-        <div class="bg-white rounded-2xl p-4 ">
-            <h2 class="text-lg font-bold mb-4">🔥 Trending Topics</h2>
+        <!-- <div class="mb-8">
+            <h2 class="text-base font-bold mb-4 text-gray-900">Trending Topics</h2>
             <div v-if="isLoadingTopics" class="flex justify-center items-center h-16">
-                <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
+                <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-gray-300"></div>
             </div>
             <div v-else-if="trendingTopics.length === 0" class="text-center py-2 text-gray-500">
                 No trending topics available
             </div>
             <div v-else class="flex flex-wrap gap-2">
                 <span v-for="topic in trendingTopics" :key="topic.name"
-                    class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm hover:bg-blue-200 transition-all duration-200 cursor-pointer">
-                    #{{ topic.name }} <span class="text-xs text-blue-500">({{ topic.count }})</span>
+                    class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm hover:bg-gray-200 transition-colors cursor-pointer">
+                    {{ topic.name }}
                 </span>
             </div>
-        </div>
+        </div> -->
 
         <!-- Suggested Authors -->
-        <div class="bg-white rounded-2xl p-4 ">
-            <h2 class="text-lg font-bold mb-4">✨ Suggested Authors</h2>
+        <div class="mb-8">
+            <h2 class="text-base font-bold mb-4 text-gray-900">Who to follow</h2>
             <div v-if="isLoadingAuthors" class="flex justify-center items-center h-24">
-                <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
+                <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-gray-300"></div>
             </div>
             <div v-else-if="suggestedAuthors.length === 0" class="text-center py-4 text-gray-500">
                 No suggested authors available
             </div>
-            <div v-else class="space-y-3">
+            <div v-else class="space-y-4">
                 <div v-for="author in suggestedAuthors" :key="author.id"
-                    class="flex items-center justify-between p-2 rounded-xl hover:bg-blue-50 transition-all duration-200 cursor-pointer border border-gray-200">
+                    class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
-                        <img :src="author.avatar" :alt="author.name" class="w-10 h-10 rounded-full">
+                        <img :src="author.avatar" :alt="author.name" class="w-8 h-8 rounded-full">
                         <div>
-                            <h3 class="font-medium">{{ author.name }}</h3>
-                            <p class="text-sm text-gray-500">{{ author.bio }}</p>
+                            <h3 class="font-medium text-sm">{{ author.name }}</h3>
+                            <p class="text-xs text-gray-500 line-clamp-1">{{ author.bio }}</p>
                         </div>
                     </div>
                     <button @click="navigateToProfile(author.id)"
-                        class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm hover:bg-blue-200 transition-all duration-200">
-                        Go to
+                        class="ml-2 px-3 py-1 border border-gray-300 text-gray-700 rounded-full text-xs hover:bg-gray-100 transition-colors">
+                        Go to profile
                     </button>
                 </div>
             </div>
+        </div>
+
+        <!-- Footer Links -->
+        <div class="pt-4 border-t border-gray-100">
+            <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs text-gray-500 mb-4">
+                <!-- <a href="#" class="hover:text-gray-800">Help</a>
+                <a href="#" class="hover:text-gray-800">Status</a>
+                <a href="#" class="hover:text-gray-800">Writers</a>
+                <a href="#" class="hover:text-gray-800">Blog</a>
+                <a href="#" class="hover:text-gray-800">Careers</a>
+                <a href="#" class="hover:text-gray-800">Privacy</a>
+                <a href="#" class="hover:text-gray-800">Terms</a>
+                <a href="#" class="hover:text-gray-800">About</a> -->
+            </div>
+            <!-- <p class="text-xs text-gray-400">© 2023 CSCC, Inc.</p> -->
         </div>
     </aside>
 </template>
@@ -253,5 +293,17 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Additional styles can be added here */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 </style>
