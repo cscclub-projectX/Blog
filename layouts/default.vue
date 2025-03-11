@@ -8,7 +8,7 @@
         v-if="!showLoginDialog && profile"
       >
         <span class="sr-only">Toggle Left Sidebar</span>
-        {{ isLeftSidebarOpen ? '❌' : '☰' }}
+        {{'☰' }}
       </button>
       
       <!-- Logo always visible -->
@@ -32,7 +32,7 @@
         v-if="!showLoginDialog && profile"
       >
         <span class="sr-only">Toggle Right Sidebar</span>
-        {{ isRightSidebarOpen ? '❌' : '⋮' }}
+        {{ '⋮' }}
       </button>
     </div>
 
