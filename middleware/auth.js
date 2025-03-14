@@ -7,7 +7,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         
         // This will throw an error if no valid session exists
         const session = await account.getSession('current')
-        console.log(session)
+        console.log("session",session)
         // If we get here, there is a valid session
         console.log('Valid session found')
         // Set authenticated state

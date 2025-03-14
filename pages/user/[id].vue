@@ -201,7 +201,8 @@ const isFollowing = ref(false)
 const posts = ref([])
 const isGridView = ref(false)
 const currentUser = useState('currentUser', () => null)
-
+const userProfile = useState('userProfile', () => null)
+console.log("userProfile",userProfile.value)
 // Realtime subscription
 let unsubscribe = null
 

@@ -177,6 +177,7 @@ let unsubscribe = null;
 
 // Check if user has a profile
 const checkUserProfile = async (userId) => {
+  const userProfile = useState('userProfile', () => false );
   try {
     const response = await databases.listDocuments(
       DATABASE_ID,
@@ -188,6 +189,8 @@ const checkUserProfile = async (userId) => {
       // Check if required profile fields are filled
       const profile = response.documents[0];
       hasProfile.value = !!(profile.name && profile.username);
+      // Add the function to the global state so it can be accessed from anywhere
+      userProfile.value = Profile.value ;
     } else {
       hasProfile.value = false;
       showProfileDialog.value = true; // Show profile dialog if no profile exists
@@ -208,10 +211,13 @@ const formatDate = (dateString) => {
   });
 };
 
+// Use a global store for navigation functions
 const navigateToProfile = (userId) => {
   console.log(userId);
   router.push(`/user/${userId.$id}`);
 };
+
+
 
 // Increment view count for a post
 const incrementViews = async (postId) => {
